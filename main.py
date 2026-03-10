@@ -1,9 +1,11 @@
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal
 from components.api_key_input import ApiKeyInput
+from views.homepage import Homepage
 from textual.widgets import Input, Button
 
 from api.api_key import get_api_key, save_api_key, delete_api_key
+from api.check_api_key import check_api_key
 
 
 class FlavortownTUI(App):
@@ -27,20 +29,32 @@ class FlavortownTUI(App):
     """
 
     def compose(self) -> ComposeResult:
-        yield ApiKeyInput()
-        with Horizontal(id="buttons"):
-            yield Button("Save API Key", id="save_key", variant="success")
-            yield Button("Print API Key", id="print_key", variant="primary")
-            yield Button("Delete API Key", id="delete_key", variant="error")
+        key = get_api_key()
+        if key and check_api_key(key):
+            yield Homepage()
+        else:
+            yield ApiKeyInput()
+            with Horizontal(id="buttons"):
+                yield Button("Save API Key", id="save_key", variant="success")
+                yield Button("Print API Key", id="print_key", variant="primary")
+                yield Button("Delete API Key", id="delete_key", variant="error")
+
+    def _show_homepage(self) -> None:
+        self.query("ApiKeyInput, #buttons").remove()
+        self.mount(Homepage())
 
     def _save_key(self) -> None:
         value = self.query_one(Input).value
         if not value.strip():
             self.notify("API key cannot be empty.", timeout=2.0)
             return
+        if not check_api_key(value):
+            self.notify("Invalid API key. Please check and try again.", timeout=4.0)
+            return
         try:
             save_api_key(value)
             self.notify("Api key saved successfully!", timeout=2.0)
+            self._show_homepage()
         except Exception as e:
             self.notify(f"Error saving api key: {e}", timeout=2.0)
 
