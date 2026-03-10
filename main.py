@@ -1,6 +1,8 @@
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal
+from textual.reactive import reactive
 from components.api_key_input import ApiKeyInput
+from components.sidebar import Sidebar
 from views.homepage import Homepage
 from textual.widgets import Input, Button
 
@@ -9,6 +11,10 @@ from api.check_api_key import check_api_key
 
 
 class FlavortownTUI(App):
+
+    BINDINGS = [("s", "toggle_sidebar", "Toggle Sidebar")]
+
+    show_sidebar = reactive(False)
 
     CSS = """
     Screen {
@@ -76,6 +82,15 @@ class FlavortownTUI(App):
                 self.notify("API key deleted successfully.", timeout=2.0)
             except Exception as e:
                 self.notify(f"Error deleting API key: {e}", timeout=2.0)
+
+    def action_toggle_sidebar(self) -> None:
+        self.show_sidebar = not self.show_sidebar
+
+    def watch_show_sidebar(self, show_sidebar: bool) -> None:
+        try:
+            self.query_one(Sidebar).set_class(show_sidebar, "-visible")
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":
