@@ -4,6 +4,9 @@ from textual.reactive import reactive
 from components.api_key_input import ApiKeyInput
 from components.sidebar import Sidebar
 from views.homepage import Homepage
+from views.projects import Projects
+from views.shop import Shop
+from views.explore import Explore
 from textual.widgets import Input, Button
 
 from api.api_key import get_api_key, save_api_key, delete_api_key
@@ -82,6 +85,26 @@ class FlavortownTUI(App):
                 self.notify("API key deleted successfully.", timeout=2.0)
             except Exception as e:
                 self.notify(f"Error deleting API key: {e}", timeout=2.0)
+
+    VIEW_MAP = {
+        "kitchen": Homepage,
+        "projects": Projects,
+        "shop": Shop,
+        "explore": Explore,
+    }
+
+    def _switch_view(self, view_name: str) -> None:
+        view_cls = self.VIEW_MAP.get(view_name)
+        if not view_cls:
+            return
+        selector = ", ".join(v.__name__ for v in self.VIEW_MAP.values())
+        current = self.query(selector)
+        current.remove()
+        self.mount(view_cls())
+        self.show_sidebar = False
+
+    def on_sidebar_navigate(self, message: Sidebar.Navigate) -> None:
+        self._switch_view(message.view)
 
     def action_toggle_sidebar(self) -> None:
         self.show_sidebar = not self.show_sidebar
