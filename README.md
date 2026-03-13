@@ -6,8 +6,10 @@ It is built using the `textual` library, which provides (imo) a great terminal U
 
 Your API key is stored securely using the `keyring` library, so you don't have to worry about it being exposed in your terminal history or config files.
 
-<img src="screenshots/kitchen.png" alt="Kitchen Screenshot" width="600">
-<img src="screenshots/with_sidebar.png" alt="Shop Screenshot" width="600">
+<div>
+  <img src="screenshots/kitchen.png" alt="Kitchen Screenshot" style="width:49%;">
+  <img src="screenshots/with_sidebar.png" alt="Shop Screenshot" style="width:49%;">
+</div>
 
 ## Usage
 
