@@ -4,7 +4,7 @@ from textual.widgets import Footer, Static, ProgressBar, Rule
 from textual.worker import Worker, get_current_worker
 
 from components.sidebar import Sidebar
-from api.get_user import get_user
+from api.api import get_user
 from api.api_key import get_api_key
 
 
@@ -36,15 +36,15 @@ class StatCard(Static):
     """
 
 
-class Homepage(Vertical):
+class Kitchen(Vertical):
 
     DEFAULT_CSS = """
-    Homepage {
+    Kitchen {
         layers: sidebar;
         overflow-y: auto;
     }
 
-    Homepage #banner {
+    Kitchen #banner {
         text-align: center;
         color: $warning;
         text-style: bold;
@@ -52,7 +52,7 @@ class Homepage(Vertical):
         height: auto;
     }
 
-    Homepage #greeting {
+    Kitchen #greeting {
         text-align: center;
         text-style: bold italic;
         color: $text;
@@ -60,7 +60,7 @@ class Homepage(Vertical):
         height: auto;
     }
 
-    Homepage #loading {
+    Kitchen #loading {
         text-align: center;
         text-style: bold;
         color: $text;
@@ -68,18 +68,18 @@ class Homepage(Vertical):
         height: auto;
     }
 
-    Homepage Rule {
+    Kitchen Rule {
         margin: 0 4;
     }
 
-    Homepage #stats-grid {
+    Kitchen #stats-grid {
         grid-size: 4;
         grid-gutter: 1 2;
         margin: 1 4;
         height: auto;
     }
 
-    Homepage #stats-grid-2 {
+    Kitchen #stats-grid-2 {
         grid-size: 2;
         grid-gutter: 1 2;
         margin: 1 4;

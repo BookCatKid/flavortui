@@ -3,7 +3,7 @@ from textual.containers import Horizontal
 from textual.reactive import reactive
 from components.api_key_input import ApiKeyInput
 from components.sidebar import Sidebar
-from views.homepage import Homepage
+from views.kitchen import Kitchen
 from views.projects import Projects
 from views.shop import Shop
 from views.explore import Explore
@@ -11,7 +11,7 @@ from views.settings import Settings
 from textual.widgets import Input, Button
 
 from api.api_key import get_api_key, save_api_key, delete_api_key
-from api.check_api_key import check_api_key
+from api.api import check_api_key
 
 
 class FlavortownTUI(App):
@@ -41,7 +41,7 @@ class FlavortownTUI(App):
     def compose(self) -> ComposeResult:
         key = get_api_key()
         if key and check_api_key(key):
-            yield Homepage()
+            yield Kitchen()
         else:
             yield ApiKeyInput()
             with Horizontal(id="buttons"):
@@ -49,9 +49,9 @@ class FlavortownTUI(App):
                 yield Button("Print API Key", id="print_key", variant="primary")
                 yield Button("Delete API Key", id="delete_key", variant="error")
 
-    def _show_homepage(self) -> None:
+    def _show_kitchen(self) -> None:
         self.query("ApiKeyInput, #buttons").remove()
-        self.mount(Homepage())
+        self.mount(Kitchen())
 
     def _save_key(self) -> None:
         value = self.query_one(Input).value
@@ -64,7 +64,7 @@ class FlavortownTUI(App):
         try:
             save_api_key(value)
             self.notify("Api key saved successfully!", timeout=2.0)
-            self._show_homepage()
+            self._show_kitchen()
         except Exception as e:
             self.notify(f"Error saving api key: {e}", timeout=2.0)
 
@@ -88,7 +88,7 @@ class FlavortownTUI(App):
                 self.notify(f"Error deleting API key: {e}", timeout=2.0)
 
     VIEW_MAP = {
-        "kitchen": Homepage,
+        "kitchen": Kitchen,
         "projects": Projects,
         "shop": Shop,
         "explore": Explore,
