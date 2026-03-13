@@ -7,6 +7,7 @@ from views.homepage import Homepage
 from views.projects import Projects
 from views.shop import Shop
 from views.explore import Explore
+from views.settings import Settings
 from textual.widgets import Input, Button
 
 from api.api_key import get_api_key, save_api_key, delete_api_key
@@ -91,6 +92,7 @@ class FlavortownTUI(App):
         "projects": Projects,
         "shop": Shop,
         "explore": Explore,
+        "settings": Settings
     }
 
     def _switch_view(self, view_name: str) -> None:

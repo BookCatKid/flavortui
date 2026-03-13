@@ -1,7 +1,7 @@
 from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.widget import Widget
-from textual.widgets import Label, Button
+from textual.widgets import Label, Button, Static
 from textual.message import Message
 
 
@@ -28,6 +28,7 @@ class Sidebar(Widget):
 
         & > Vertical {
             margin: 1 2;
+            height: 100%;
         }
 
         & Label#sidebar-title {
@@ -40,6 +41,10 @@ class Sidebar(Widget):
             width: 100%;
             margin: 0 0 1 0;
         }
+
+        #spacer {
+            height: 1fr;
+        }
     }
     """
 
@@ -50,6 +55,8 @@ class Sidebar(Widget):
             yield Button("Projects", id="nav-projects")
             yield Button("Shop", id="nav-shop")
             yield Button("Explore", id="nav-explore")
+            yield Static(id="spacer")
+            yield Button("Settings", id="nav-settings")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id and event.button.id.startswith("nav-"):
