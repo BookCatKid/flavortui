@@ -97,7 +97,7 @@ class Homepage(Vertical):
         self.run_worker(self._load_user, thread=True)
 
     def _load_user(self) -> None:
-        user = get_user(get_api_key())
+        user = get_user(get_api_key())[1]
         self.app.call_from_thread(self._render_user, user)
 
     def _render_user(self, user) -> None:

@@ -1,4 +1,12 @@
+# python stuff
 venv/
 __pycache__/
+
+# api cache
+.cache/
+
+# might use this at some point (its for debugging 😱)
 debug.log
+
+# I hate macos
 .DS_Store

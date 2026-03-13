@@ -1,0 +1,83 @@
+import time
+import json
+import os
+import requests
+import hashlib
+
+CACHE_DIR = ".cache"
+
+class ApiClient:
+    def __init__(self, api_key):
+        self.api_key = api_key
+        self.base_url = "https://flavortown.hackclub.com/api/v1"
+        self.headers = {"Authorization": f"Bearer {api_key}"}
+
+        self._ensure_cache_dir()
+
+        self.rate_limits = {
+            # In seconds, how long we should wait between requests. In general we go for double the "required" time.
+            "projects": 24,
+            "store": 24,
+            "users_list": 24,
+            "projects_id": 4,
+            "store_id": 4,
+            "default": 2,
+        }
+
+    def _ensure_cache_dir(self):
+        os.makedirs(CACHE_DIR, exist_ok=True)
+
+    def _get_cache_file(self, endpoint):
+        hashed_key = hashlib.sha256(endpoint.encode()).hexdigest()
+        return os.path.join(CACHE_DIR, f"{hashed_key}.json")
+
+    def _save_to_cache(self, endpoint, response, status_code):
+        file_name = self._get_cache_file(endpoint)
+        with open(file_name, "w") as file:
+            json.dump({
+                "timestamp": time.time(),
+                "data": response,
+                "status_code": status_code
+            }, file)
+
+    def _load_from_cache(self, endpoint):
+        file_name = self._get_cache_file(endpoint)
+        if os.path.exists(file_name):
+            with open(file_name, "r") as f:
+                return json.load(f)
+        return None
+
+    def _get_endpoint_rate_limit(self, endpoint):
+        parts = endpoint.split("/")
+        base = parts[0]
+
+        if base == "users":
+            if len(parts) == 1:
+                return self.rate_limits["users_list"]
+            else:
+                return self.rate_limits["default"]
+
+        # add other bases here later
+
+        return self.rate_limits["default"]
+
+    def fetch_endpoint(self, endpoint, cache=True):
+        cached_file = self._load_from_cache(endpoint)
+        if cache and cached_file:
+            if time.time() - cached_file["timestamp"] < self._get_endpoint_rate_limit(endpoint):
+                return cached_file["status_code"], cached_file["data"]
+
+        url = f"{self.base_url}/{endpoint}"
+        response = requests.get(url, headers=self.headers)
+        data = response.json()
+        if cache:
+            self._save_to_cache(endpoint, data, response.status_code)
+        return response.status_code, data
+
+_global_client = None
+
+def get_client(api_key):
+    global _global_client
+    if not _global_client or _global_client.api_key != api_key:
+        _global_client = ApiClient(api_key)
+    return _global_client
