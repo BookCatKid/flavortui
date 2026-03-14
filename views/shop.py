@@ -1,5 +1,3 @@
-from io import BytesIO
-
 from textual.app import ComposeResult
 from textual.containers import Vertical, Grid, Horizontal
 from textual.screen import ModalScreen
@@ -7,10 +5,12 @@ from textual.widgets import Footer, Static, Select, Input, Button, Label
 from textual_image.widget import Image
 
 from components.sidebar import Sidebar
+
 from api.api import get_store
 from api.api_key import get_api_key
-
 from api.client import get_client
+
+import webbrowser
 
 
 class ShopCard(Vertical):
@@ -41,13 +41,16 @@ class ShopCard(Vertical):
     }
     """
 
-    def __init__(self, image_path, name, price, stock, shop_item, **kwargs):
+    def __init__(self, image_path, name, price, stock, regions, shop_item, **kwargs):
         super().__init__(**kwargs)
         self._image_path = image_path
         self._name = name
         self._price = price
         self._stock = stock
+        self._regions = regions
         self._shop_item = shop_item
+        self._sort_name = name.lower()
+        self._sort_price = price
 
     def compose(self) -> ComposeResult:
         if self._image_path:
@@ -111,7 +114,6 @@ class ShopItem(ModalScreen):
         if event.button.id == "quit":
             self.app.exit()
         elif event.button.id == "open-web":
-            import webbrowser
             webbrowser.open(f"https://flavortown.hackclub.com/shop/order?shop_item_id={self._shop_item['id']}")
         else:
             self.app.pop_screen()
@@ -160,16 +162,24 @@ class Shop(Vertical):
         yield Static("Loading...", id="loading")
         yield Footer()
 
-    def on_mount(self) -> None:
-        self._shop_data = None
+    def on_mount(self):
+        self._cards = []
         self.run_worker(self._load_store, thread=True)
 
-    def _load_store(self) -> None:
-        shop = get_store(get_api_key())[1]
-        self.app.call_from_thread(self._on_store_loaded, shop)
+    def _load_store(self):
+        api_key = get_api_key()
+        shop = get_store(api_key)[1]
+        client = get_client(api_key)
 
-    def _on_store_loaded(self, shop) -> None:
-        self._shop_data = shop
+        cards_data = []
+        for item in shop:
+            if item["buyable_by_self"] and item["type"] != "ShopItem::FreeStickers":
+                image_path = client.fetch_image(item["image_url"])
+                cards_data.append((image_path, item))
+
+        self.app.call_from_thread(self._on_store_loaded, cards_data)
+
+    def _on_store_loaded(self, cards_data):
         self.query_one("#loading", Static).remove()
         footer = self.query_one(Footer)
         self.mount(Input(placeholder="Search Items...", id="search-input"), before=footer)
@@ -189,51 +199,58 @@ class Shop(Vertical):
             id="region-select",
             value="all",
         ), before=footer)
-        self.mount(Grid(id="shop-grid"), before=footer)
-        self._render_shop(shop, "price", "all", "")
+        grid = Grid(id="shop-grid")
+        self.mount(grid, before=footer)
 
-    def _format_shop_data(self, shop, sort, region, search):
-        if region != "all":
-            shop = [item for item in shop if item["enabled"][f"enabled_{region}"] == True]
+        for image_path, item in cards_data:
+            card = ShopCard(
+                image_path,
+                item["name"],
+                item["ticket_cost"]["base_cost"],
+                item["stock"],
+                item["enabled"],
+                item,
+            )
+            self._cards.append(card)
 
-        if sort == "name":
-            shop.sort(key=lambda x: x["name"])
-        elif sort == "price":
-            shop.sort(key=lambda x: x["ticket_cost"]["base_cost"])
+        grid.mount_all(self._cards)
+        self._apply_sort("price")
 
-        if query := (search or "").strip().lower():
-            shop = [item for item in shop if query in item["name"].lower()]
+    def _apply_sort(self, sort_value) -> None:
+        cards = [c for c in self._cards if c.display]
+        if sort_value == "name":
+            cards.sort(key=lambda c: c._sort_name)
+        elif sort_value == "price":
+            cards.sort(key=lambda c: c._sort_price)
 
-        return shop
-
-    def _render_shop(self, shop, sort, region, search):
         grid = self.query_one("#shop-grid", Grid)
-        grid.remove_children()
-
-        shop = self._format_shop_data(shop, sort, region, search)
-
-        for shop_item in shop:
-            if shop_item["buyable_by_self"] and shop_item["type"] != "ShopItem::FreeStickers":
-                name = shop_item["name"]
-                price = shop_item["ticket_cost"]["base_cost"]
-                stock = shop_item["stock"]
-                image_path = get_client(get_api_key()).fetch_image(shop_item["image_url"])
-                grid.mount(ShopCard(image_path, name, price, stock, shop_item))
-
+        for i, card in enumerate(cards):
+            grid.move_child(card, before=i)
 
     def on_select_changed(self, event: Select.Changed) -> None:
-        if self._shop_data is None:
+        if not self._cards:
             return
         if event.select.id in ("sort-select", "region-select"):
-            sort_value = self.query_one("#sort-select", Select).value
-            region_value = self.query_one("#region-select", Select).value
-            search_value = self.query_one("#search-input", Input).value
-            self._render_shop(self._shop_data, sort_value, region_value, search_value)
+            self._refilter()
 
     def on_input_changed(self, event: Input.Changed):
-        if self._shop_data is None:
+        if not self._cards:
             return
         if event.input.id == "search-input":
-            sort_value = self.query_one("#sort-select", Select).value
-            region_value = self.query_one("#region-select", Select).value
-            self._render_shop(self._shop_data, sort_value, region_value, event.value)
+            self._refilter()
+
+    def _refilter(self) -> None:
+        sort_value = self.query_one("#sort-select", Select).value
+        region_value = self.query_one("#region-select", Select).value
+        search_query = self.query_one("#search-input", Input).value.strip().lower()
+
+        for card in self._cards:
+            show = True
+            if region_value != "all":
+                if not card._regions.get(f"enabled_{region_value}", False):
+                    show = False
+            if search_query and search_query not in card._sort_name:
+                show = False
+            card.display = show
+
+        self._apply_sort(sort_value)
