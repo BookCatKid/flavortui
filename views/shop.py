@@ -41,16 +41,18 @@ class ShopCard(Vertical):
     }
     """
 
-    def __init__(self, image_path, name, price, stock, regions, shop_item, **kwargs):
+    def __init__(self, image_path, shop_item, **kwargs):
         super().__init__(**kwargs)
         self._image_path = image_path
-        self._name = name
-        self._price = price
-        self._stock = stock
-        self._regions = regions
+        self._name = shop_item["name"]
+        self._price = shop_item["ticket_cost"]["base_cost"]
+        self._sale_percentage = shop_item["sale_percentage"]
+        self._real_price = self._price * (1 - (self._sale_percentage or 0) / 100)
+        self._stock = shop_item["stock"]
+        self._regions = shop_item["enabled"]
         self._shop_item = shop_item
-        self._sort_name = name.lower()
-        self._sort_price = price
+        self._sort_name = self._name.lower()
+        self._sort_price = self._price
 
     def compose(self) -> ComposeResult:
         if self._image_path:
@@ -59,8 +61,23 @@ class ShopCard(Vertical):
             yield Static("[italic]No image available[/italic]", classes="shop-placeholder")
 
         stock_display = f"Stock: {self._stock}" if self._stock is not None else ""
+
+        if self._sale_percentage:
+            price_line = (
+                f"[italic][strike]{f"{self._price:.2f}".rstrip("0").rstrip('.')} 🍪[/strike][/italic]\t"
+                f"[green]{f'{self._real_price:.2f}'.rstrip('0').rstrip('.')} 🍪[/green]"
+            )
+        else:
+            price_line = f"{f'{self._price:.2f}'.rstrip('0').rstrip('.')} 🍪"
+
+        text = (
+            f"[bold]{self._name}[/bold]\n\n"
+            f"{price_line}\n"
+            f"[italic]{stock_display}[/italic]"
+        )
+
         yield Static(
-            f"[bold]{self._name}[/bold]\n\n{self._price} 🍪\n[italic]{stock_display}[/italic]",
+            text,
             classes="shop-text",
         )
 
@@ -205,10 +222,6 @@ class Shop(Vertical):
         for image_path, item in cards_data:
             card = ShopCard(
                 image_path,
-                item["name"],
-                item["ticket_cost"]["base_cost"],
-                item["stock"],
-                item["enabled"],
                 item,
             )
             self._cards.append(card)
