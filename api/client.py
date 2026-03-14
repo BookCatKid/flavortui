@@ -27,12 +27,12 @@ class ApiClient:
     def _ensure_cache_dir(self):
         os.makedirs(CACHE_DIR, exist_ok=True)
 
-    def _get_cache_file(self, endpoint):
+    def _get_cache_file(self, endpoint, format):
         hashed_key = hashlib.sha256(endpoint.encode()).hexdigest()
-        return os.path.join(CACHE_DIR, f"{hashed_key}.json")
+        return os.path.join(CACHE_DIR, f"{hashed_key}.{format}")
 
     def _save_to_cache(self, endpoint, response, status_code):
-        file_name = self._get_cache_file(endpoint)
+        file_name = self._get_cache_file(endpoint, "json")
         with open(file_name, "w") as file:
             json.dump({
                 "timestamp": time.time(),
@@ -41,7 +41,7 @@ class ApiClient:
             }, file)
 
     def _load_from_cache(self, endpoint):
-        file_name = self._get_cache_file(endpoint)
+        file_name = self._get_cache_file(endpoint, "json")
         if os.path.exists(file_name):
             with open(file_name, "r") as f:
                 return json.load(f)
@@ -56,6 +56,12 @@ class ApiClient:
                 return self.rate_limits["users_list"]
             else:
                 return self.rate_limits["default"]
+
+        if base == "store":
+            if len(parts) == 1:
+                return self.rate_limits["store"]
+            else:
+                return self.rate_limits["store_id"]
 
         # add other bases here later
 
@@ -73,6 +79,14 @@ class ApiClient:
         if cache:
             self._save_to_cache(endpoint, data, response.status_code)
         return response.status_code, data
+
+    def fetch_image(self, url):
+        if not os.path.exists(self._get_cache_file(url, url.split(".")[-1])):
+            response = requests.get(url)
+            response.raise_for_status()
+            with open(self._get_cache_file(url, url.split(".")[-1]), "wb") as f:
+                f.write(response.content)
+        return self._get_cache_file(url, url.split(".")[-1])
 
 _global_client = None
 

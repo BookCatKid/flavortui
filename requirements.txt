@@ -1,3 +1,4 @@
 textual
 keyring
 requests
+textual-image[textual]
