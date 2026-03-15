@@ -45,7 +45,8 @@ class ShopCard(Vertical):
         super().__init__(**kwargs)
         self._image_path = image_path
         self._name = shop_item["name"]
-        self._price = shop_item["ticket_cost"]["base_cost"]
+        self._ticket_cost = shop_item["ticket_cost"]
+        self._price = self._ticket_cost["base_cost"]
         self._sale_percentage = shop_item["sale_percentage"]
         self._real_price = self._price * (1 - (self._sale_percentage or 0) / 100)
         self._stock = shop_item["stock"]
@@ -54,12 +55,7 @@ class ShopCard(Vertical):
         self._sort_name = self._name.lower()
         self._sort_price = self._price
 
-    def compose(self) -> ComposeResult:
-        if self._image_path:
-            yield Image(self._image_path, classes="shop-image")
-        else:
-            yield Static("[italic]No image available[/italic]", classes="shop-placeholder")
-
+    def _build_text(self) -> str:
         stock_display = f"Stock: {self._stock}" if self._stock is not None else ""
 
         if self._sale_percentage:
@@ -70,16 +66,28 @@ class ShopCard(Vertical):
         else:
             price_line = f"{f'{self._price:.2f}'.rstrip('0').rstrip('.')} 🍪"
 
-        text = (
+        return (
             f"[bold]{self._name}[/bold]\n\n"
             f"{price_line}\n"
             f"[italic]{stock_display}[/italic]"
         )
 
-        yield Static(
-            text,
-            classes="shop-text",
-        )
+    def compose(self) -> ComposeResult:
+        if self._image_path:
+            yield Image(self._image_path, classes="shop-image")
+        else:
+            yield Static("[italic]No image available[/italic]", classes="shop-placeholder")
+
+        yield Static(self._build_text(), classes="shop-text")
+
+    def set_region(self, region: str) -> None:
+        if region == "all":
+            self._price = self._ticket_cost["base_cost"]
+        else:
+            self._price = self._ticket_cost.get(region, self._ticket_cost["base_cost"])
+        self._real_price = self._price * (1 - (self._sale_percentage or 0) / 100)
+        self._sort_price = self._price
+        self.query_one(".shop-text", Static).update(self._build_text())
 
     def on_click(self) -> None:
         self.app.push_screen(ShopItem(self._shop_item))
@@ -265,5 +273,6 @@ class Shop(Vertical):
             if search_query and search_query not in card._sort_name:
                 show = False
             card.display = show
+            card.set_region(region_value)
 
         self._apply_sort(sort_value)
