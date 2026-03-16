@@ -10,7 +10,8 @@ class ApiClient:
     def __init__(self, api_key):
         self.api_key = api_key
         self.base_url = "https://flavortown.hackclub.com/api/v1"
-        self.headers = {"Authorization": f"Bearer {api_key}"}
+        self.headers = {"Authorization": f"Bearer {api_key}",
+                        "X-Flavortown-Ext-16596": "true"}
 
         self._ensure_cache_dir()
 
