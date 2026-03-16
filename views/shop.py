@@ -1,7 +1,7 @@
 from textual.app import ComposeResult
 from textual.containers import Vertical, Grid, Horizontal
 from textual.screen import ModalScreen
-from textual.widgets import Footer, Static, Select, Input, Button, Label
+from textual.widgets import Footer, Markdown, Static, Select, Input, Button, Label
 from textual_image.widget import Image
 
 from components.sidebar import Sidebar
@@ -191,6 +191,12 @@ class ShopItem(ModalScreen):
         text-align: center;
     }
 
+    #item-long-description {
+        padding: 1;
+        border: tall $accent;
+        background: $boost;
+    }
+
     .accessory-group {
         height: auto;
         width: 100%;
@@ -255,6 +261,8 @@ class ShopItem(ModalScreen):
                 yield Static(f"{price_line}{stock_display}", id="item-info")
                 if self._shop_item.get("description"):
                     yield Static(self._shop_item["description"], id="item-description")
+                if self._shop_item.get("long_description"):
+                    yield Markdown(self._shop_item["long_description"], id="item-long-description")
 
                 sub_items = self._get_sub_items()
                 if sub_items:
@@ -311,6 +319,20 @@ class Shop(Vertical):
         height: auto;
     }
 
+    Shop #sort-container {
+        height: auto;
+        align-vertical: middle;
+    }
+
+    Shop #sort-container Select {
+        width: 1fr;
+    }
+
+    Shop #sort-container Button {
+        min-width: 5;
+        width: auto;
+    }
+
     Shop .shop-image {
         width: 100%;
         height: auto;
@@ -325,6 +347,7 @@ class Shop(Vertical):
 
     def on_mount(self):
         self._cards = []
+        self._reverse_sort = False
         self.run_worker(self._load_store, thread=True)
 
     def _load_store(self):
@@ -344,7 +367,11 @@ class Shop(Vertical):
         self.query_one("#loading", Static).remove()
         footer = self.query_one(Footer)
         self.mount(Input(placeholder="Search Items...", id="search-input"), before=footer)
-        self.mount(Select(options=[("Name", "name"), ("Price", "price"), ("Arbitrary", "arbitrary")], prompt="Sort by", id="sort-select", value="price"), before=footer)
+        self.mount(Horizontal(
+            Select(options=[("Name", "name"), ("Price", "price"), ("Arbitrary", "arbitrary")], prompt="Sort by", id="sort-select", value="price"),
+            Button("↑", id="flip-sort"),
+            id="sort-container"
+        ), before=footer)
         self.mount(Select(
             options=[
                 ("All Regions", "all"),
@@ -379,13 +406,26 @@ class Shop(Vertical):
     def _apply_sort(self, sort_value) -> None:
         cards = [c for c in self._cards if c.display]
         if sort_value == "name":
-            cards.sort(key=lambda c: c._sort_name)
+            cards.sort(key=lambda c: c._sort_name, reverse=self._reverse_sort)
         elif sort_value == "price":
-            cards.sort(key=lambda c: c._sort_price)
+            cards.sort(key=lambda c: c._sort_price, reverse=self._reverse_sort)
+        elif sort_value == "arbitrary":
+            if self._reverse_sort:
+                cards.reverse()
 
         grid = self.query_one("#shop-grid", Grid)
         for i, card in enumerate(cards):
             grid.move_child(card, before=i)
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "flip-sort":
+            self._reverse_sort = not self._reverse_sort
+            event.button.label = "↓" if self._reverse_sort else "↑"
+            self._apply_sort(self.query_one("#sort-select", Select).value)
+        elif event.button.id == "open-web":
+            webbrowser.open(f"https://flavortown.hackclub.com/shop/order?shop_item_id={self._shop_item['id']}")
+        elif event.button.id == "close":
+            self.app.pop_screen()
 
     def on_select_changed(self, event: Select.Changed) -> None:
         if not self._cards:
