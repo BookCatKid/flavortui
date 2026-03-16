@@ -13,6 +13,30 @@ from api.client import get_client
 import webbrowser
 
 
+def format_price(price: float) -> str:
+    return f"{price:.2f}".rstrip("0").rstrip(".")
+
+
+def build_price_line(price: float, sale_percentage: float | None) -> str:
+    if sale_percentage:
+        real_price = price * (1 - sale_percentage / 100)
+        return (
+            f"[italic][strike]{format_price(price)} 🍪[/strike][/italic]\t"
+            f"[green]{format_price(real_price)} 🍪[/green]"
+        )
+    return f"{format_price(price)} 🍪"
+
+
+def build_shop_text(name: str, price: float, sale_percentage: float | None, stock: int | None) -> str:
+    stock_display = f"Stock: {stock}" if stock is not None else ""
+    price_line = build_price_line(price, sale_percentage)
+    return (
+        f"[bold]{name}[/bold]\n\n"
+        f"{price_line}\n"
+        f"[italic]{stock_display}[/italic]"
+    )
+
+
 class ShopCard(Vertical):
     DEFAULT_CSS = """
     ShopCard {
@@ -41,9 +65,10 @@ class ShopCard(Vertical):
     }
     """
 
-    def __init__(self, image_path, shop_item, **kwargs):
+    def __init__(self, image_path, shop_item, shop_data, **kwargs):
         super().__init__(**kwargs)
         self._image_path = image_path
+        self._shop_data = shop_data
         self._name = shop_item["name"]
         self._ticket_cost = shop_item["ticket_cost"]
         self._price = self._ticket_cost["base_cost"]
@@ -56,28 +81,10 @@ class ShopCard(Vertical):
         self._sort_price = self._price
 
     def _build_text(self) -> str:
-        stock_display = f"Stock: {self._stock}" if self._stock is not None else ""
-
-        if self._sale_percentage:
-            price_line = (
-                f"[italic][strike]{f"{self._price:.2f}".rstrip("0").rstrip('.')} 🍪[/strike][/italic]\t"
-                f"[green]{f'{self._real_price:.2f}'.rstrip('0').rstrip('.')} 🍪[/green]"
-            )
-        else:
-            price_line = f"{f'{self._price:.2f}'.rstrip('0').rstrip('.')} 🍪"
-
-        return (
-            f"[bold]{self._name}[/bold]\n\n"
-            f"{price_line}\n"
-            f"[italic]{stock_display}[/italic]"
-        )
+        return build_shop_text(self._name, self._price, self._sale_percentage, self._stock)
 
     def compose(self) -> ComposeResult:
-        if self._image_path:
-            yield Image(self._image_path, classes="shop-image")
-        else:
-            yield Static("[italic]No image available[/italic]", classes="shop-placeholder")
-
+        yield Image(self._image_path, classes="shop-image")
         yield Static(self._build_text(), classes="shop-text")
 
     def set_region(self, region: str) -> None:
@@ -90,33 +97,120 @@ class ShopCard(Vertical):
         self.query_one(".shop-text", Static).update(self._build_text())
 
     def on_click(self) -> None:
-        self.app.push_screen(ShopItem(self._shop_item))
+        self.app.push_screen(ShopItem(self._image_path, self._shop_item, self._shop_data))
+
+class SubItemRow(Vertical):
+    DEFAULT_CSS = """
+    SubItemRow {
+        width: 100%;
+        height: auto;
+        border: tall $accent;
+        background: $boost;
+        padding: 0 1;
+        align-horizontal: center;
+    }
+
+    SubItemRow .sub-item-name {
+        width: 100%;
+        text-align: center;
+    }
+
+    SubItemRow .sub-item-price {
+        width: 100%;
+        text-align: center;
+    }
+    """
+
+    def __init__(self, name: str, price: float, sale_percentage: float | None, **kwargs):
+        super().__init__(**kwargs)
+        self._name = name
+        self._price = price
+        self._sale_percentage = sale_percentage
+
+    def compose(self) -> ComposeResult:
+        yield Static(self._name, classes="sub-item-name")
+        yield Static(build_price_line(self._price, self._sale_percentage), classes="sub-item-price")
+
 
 class ShopItem(ModalScreen):
 
     DEFAULT_CSS = """
-    #dialog {
-        grid-size: 2;
-        grid-gutter: 1 2;
-        grid-rows: 1fr 4;
-        padding: 0 1;
-        width: 90%;
-        height: 90%;
-        background: $surface;
+    ShopItem {
+        align: center middle;
     }
 
-    #question {
-        column-span: 2;
+    #dialog {
+        width: 80%;
+        height: 90%;
+        background: $surface;
+        padding: 1 2;
+    }
+
+    #dialog-content {
+        overflow-y: auto;
         height: 1fr;
-        width: 1fr;
-        content-align: center middle;
+    }
+
+    #item-header {
+        height: auto;
+        width: 100%;
+    }
+
+    #item-image-row {
+        width: 100%;
+        height: auto;
+        align: center middle;
+    }
+
+    #item-image {
+        width: auto;
+        height: 12;
+        min-height: 12;
+        max-height: 12;
+    }
+
+    #item-title {
+        text-align: center;
+        text-style: bold;
+        width: 100%;
+        height: auto;
+        margin: 1 0;
+    }
+
+    #item-info {
+        height: auto;
+        width: 100%;
+        margin: 0 0 1 0;
+        text-align: center;
+    }
+
+    #item-description {
+        width: 100%;
+        height: auto;
+        margin: 0 0 1 0;
+        text-align: center;
+    }
+
+    .accessory-group {
+        height: auto;
+        width: 100%;
+        margin: 0 0 1 0;
+        align-horizontal: center;
+    }
+
+    .accessory-group-title {
+        text-align: center;
+        text-style: bold;
+        width: 100%;
+        height: auto;
+        margin: 1 0;
     }
 
     #button-container {
-        column-span: 2;
         height: auto;
-        margin-bottom: 1;
+        dock: bottom;
         align-horizontal: center;
+        padding: 1 0;
     }
 
     #button-container Button {
@@ -124,21 +218,63 @@ class ShopItem(ModalScreen):
     }
     """
 
-    def __init__(self, shop_item, **kwargs):
+    def __init__(self, image_path, shop_item, shop_data, **kwargs):
         super().__init__(**kwargs)
+        self._image_path = image_path
         self._shop_item = shop_item
+        self._shop_data = shop_data
+
+    def _get_sub_items(self):
+        sub_items = []
+        for item in self._shop_data:
+            if self._shop_item["id"] in item.get("attached_shop_item_ids", []):
+                sub_items.append(item)
+        return sub_items
+
+    def _group_sub_items(self, sub_items):
+        groups = {}
+        for item in sub_items:
+            tag = item.get("accessory_tag") or "other"
+            groups.setdefault(tag, []).append(item)
+        return groups
 
     def compose(self) -> ComposeResult:
-        yield Grid(
-            Label(self._shop_item["name"], id="question"),
-            Horizontal(Button("Open on Web", variant="primary", id="open-web"), Button("Close", variant="primary", id="close"), id="button-container"),
-            id="dialog",
-        )
+        price = self._shop_item["ticket_cost"]["base_cost"]
+        sale = self._shop_item["sale_percentage"]
+        stock = self._shop_item["stock"]
+        price_line = build_price_line(price, sale)
+        stock_display = f"  ·  Stock: {stock}" if stock is not None else ""
+
+        with Vertical(id="dialog"):
+            with Vertical(id="dialog-content"):
+                with Vertical(id="item-header"):
+                    if self._image_path:
+                        with Horizontal(id="item-image-row"):
+                            yield Image(self._image_path, id="item-image")
+                    yield Static(f"[bold]{self._shop_item['name']}[/bold]", id="item-title")
+                yield Static(f"{price_line}{stock_display}", id="item-info")
+                if self._shop_item.get("description"):
+                    yield Static(self._shop_item["description"], id="item-description")
+
+                sub_items = self._get_sub_items()
+                if sub_items:
+                    groups = self._group_sub_items(sub_items)
+                    for tag, items in groups.items():
+                        with Vertical(classes="accessory-group"):
+                            yield Static(f"[bold]{tag.replace('_', ' ').title()}[/bold]", classes="accessory-group-title")
+                            for item in items:
+                                item_price = item["ticket_cost"]["base_cost"]
+                                item_sale = item.get("sale_percentage")
+                                yield SubItemRow(item["name"], item_price, item_sale)
+
+            yield Horizontal(
+                Button("Open on Web", variant="primary", id="open-web"),
+                Button("Close", variant="primary", id="close"),
+                id="button-container",
+            )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "quit":
-            self.app.exit()
-        elif event.button.id == "open-web":
+        if event.button.id == "open-web":
             webbrowser.open(f"https://flavortown.hackclub.com/shop/order?shop_item_id={self._shop_item['id']}")
         else:
             self.app.pop_screen()
@@ -202,9 +338,9 @@ class Shop(Vertical):
                 image_path = client.fetch_image(item["image_url"])
                 cards_data.append((image_path, item))
 
-        self.app.call_from_thread(self._on_store_loaded, cards_data)
+        self.app.call_from_thread(self._on_store_loaded, cards_data, shop)
 
-    def _on_store_loaded(self, cards_data):
+    def _on_store_loaded(self, cards_data, shop_data):
         self.query_one("#loading", Static).remove()
         footer = self.query_one(Footer)
         self.mount(Input(placeholder="Search Items...", id="search-input"), before=footer)
@@ -227,10 +363,13 @@ class Shop(Vertical):
         grid = Grid(id="shop-grid")
         self.mount(grid, before=footer)
 
+        self._shop_data = shop_data
+
         for image_path, item in cards_data:
             card = ShopCard(
                 image_path,
                 item,
+                shop_data,
             )
             self._cards.append(card)
 
