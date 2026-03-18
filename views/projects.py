@@ -1,7 +1,6 @@
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, Grid
 from textual.widgets import Footer, Markdown, Static, Button
-from textual.screen import ModalScreen
 from textual_image.widget import Image
 
 from components.sidebar import Sidebar
@@ -86,8 +85,7 @@ class ProjectCard(Vertical):
         ))
 
     def _on_click(self, event):
-        # self.app.push_screen(ProjectItem(self._image_path, self._project))
-        self.app.push_screen(PopupModal())
+        self.app.push_screen(ProjectItem(self._image_path, self._project))
 
 class DevlogRow(Vertical):
     DEFAULT_CSS = """
@@ -115,25 +113,9 @@ class DevlogRow(Vertical):
             f"{self._devlog['body']}"
         )
 
-class ProjectItem(ModalScreen):
+class ProjectItem(PopupModal):
 
     DEFAULT_CSS = """
-    ProjectItem {
-        align: center middle;
-    }
-
-    #dialog {
-        width: 80%;
-        height: 90%;
-        background: $surface;
-        padding: 1 2;
-    }
-
-    #dialog-content {
-        overflow-y: auto;
-        height: 1fr;
-    }
-
     #project-header {
         height: auto;
         width: 100%;
@@ -208,23 +190,12 @@ class ProjectItem(ModalScreen):
         margin: 1 0;
     }
 
-    #button-container {
-        height: auto;
-        dock: bottom;
-        align-horizontal: center;
-        padding: 1 0;
-    }
-
-    #button-container Button {
-        margin: 0 2;
-    }
-
     .loading {
         text-align: center;
-        text-style: bold;
-        color: $text;
+        # text-style: bold;
+        # color: $text;
         margin: 2 0;
-        height: auto;
+        # height: auto;
     }
     """
 
@@ -233,7 +204,7 @@ class ProjectItem(ModalScreen):
         self._image_path = image_path
         self._project_item = project_item
 
-    def compose(self) -> ComposeResult:
+    def compose_content(self) -> ComposeResult:
         name = self._project_item["title"]
         description = self._project_item["description"]
         devlog_ids = self._project_item["devlog_ids"]
@@ -241,30 +212,28 @@ class ProjectItem(ModalScreen):
         created_at = self._project_item["created_at"]
         updated_at = self._project_item["updated_at"]
 
-        with Vertical(id="dialog"):
-            with Vertical(id="dialog-content"):
-                with Vertical(id="project-header"):
-                    if self._image_path:
-                        with Horizontal(id="project-image-row"):
-                            yield Image(self._image_path, id="project-image")
-                    yield Static(f"[bold]{name}[/bold]", id="project-title")
-                yield Markdown(build_project_md(
-                    name,
-                    description,
-                    devlog_ids,
-                    ship_status,
-                    float('inf'),
-                    created_at,
-                    updated_at
-                ))
-                yield Static("Loading...", classes="loading")
-                yield Vertical(id="devlogs-container")
+        with Vertical(id="project-header"):
+            if self._image_path:
+                with Horizontal(id="project-image-row"):
+                    yield Image(self._image_path, id="project-image")
+            yield Static(f"[bold]{name}[/bold]", id="project-title")
+        yield Markdown(build_project_md(
+            name,
+            description,
+            devlog_ids,
+            ship_status,
+            float('inf'),
+            created_at,
+            updated_at
+        ))
+        yield Static("Loading...", classes="loading")
+        yield Vertical(id="devlogs-container")
 
-            yield Horizontal(
-                Button("Open on Web", variant="primary", id="open-web"),
-                Button("Close", variant="primary", id="close"),
-                id="button-container",
-            )
+    def compose_footer(self) -> ComposeResult:
+        return [
+            Button("Open on Web", variant="primary", id="open-web"),
+            Button("Close", variant="primary", id="close")
+        ]
 
     def on_mount(self):
         self.run_worker(self._load_devlogs, thread=True, exit_on_error=False)

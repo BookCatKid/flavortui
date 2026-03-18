@@ -1,7 +1,6 @@
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.reactive import reactive
-from textual.screen import ModalScreen
 from textual.widgets import Input, Button, Static
 
 from components.api_key_input import ApiKeyInput
@@ -12,55 +11,9 @@ from views.shop import Shop
 from views.explore import Explore
 from views.settings import Settings
 
-from textual.worker import WorkerState
-
 from api.api_key import get_api_key, save_api_key, delete_api_key
 from api.api import check_api_key
 from api.client import OfflineError, get_client
-
-
-class OfflineScreen(ModalScreen):
-
-    DEFAULT_CSS = """
-    OfflineScreen {
-        align: center middle;
-    }
-
-    #offline-dialog {
-        width: 50;
-        height: auto;
-        background: $surface;
-        border: tall $error;
-        padding: 1 2;
-    }
-
-    #offline-dialog Static {
-        width: 100%;
-        text-align: center;
-        margin: 1 0;
-    }
-
-    #offline-buttons {
-        width: 100%;
-        height: auto;
-        align-horizontal: center;
-    }
-
-    #offline-buttons Button {
-        margin: 0 1;
-    }
-    """
-
-    def compose(self) -> ComposeResult:
-        with Vertical(id="offline-dialog"):
-            yield Static("⚠️ You are offline")
-            yield Static("Could not connect to the Flavortown server.")
-            with Horizontal(id="offline-buttons"):
-                yield Button("OK", variant="primary", id="offline-ok")
-                yield Button("Quit", variant="error", id="offline-quit")
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        self.app.exit()
 
 
 class FlavortownTUI(App):
@@ -108,10 +61,7 @@ class FlavortownTUI(App):
         try:
             valid = key and check_api_key(key)
         except OfflineError:
-            self._offline = True
-            valid = False
-        else:
-            self._offline = False
+            valid = bool(key)
 
         if valid:
             yield Kitchen()
@@ -121,14 +71,6 @@ class FlavortownTUI(App):
                 yield Button("Save API Key", id="save_key", variant="success")
                 yield Button("Print API Key", id="print_key", variant="primary")
                 yield Button("Delete API Key", id="delete_key", variant="error")
-
-    def on_mount(self) -> None:
-        if getattr(self, "_offline", False):
-            self.push_screen(OfflineScreen())
-
-    def on_worker_state_changed(self, event) -> None:
-        if event.worker.state == WorkerState.ERROR and isinstance(event.worker.error, OfflineError):
-            self.push_screen(OfflineScreen())
 
     def update_offline_banner(self) -> None:
         try:

@@ -1,10 +1,10 @@
 from textual.app import ComposeResult
 from textual.containers import Vertical, Grid, Horizontal
-from textual.screen import ModalScreen
 from textual.widgets import Footer, Markdown, Static, Select, Input, Button
 from textual_image.widget import Image
 
 from components.sidebar import Sidebar
+from components.popup_modal import PopupModal
 
 from api.api import get_store
 from api.api_key import get_api_key
@@ -132,25 +132,9 @@ class SubItemRow(Vertical):
         yield Static(build_price_line(self._price, self._sale_percentage), classes="sub-item-price")
 
 
-class ShopItem(ModalScreen):
+class ShopItem(PopupModal):
 
     DEFAULT_CSS = """
-    ShopItem {
-        align: center middle;
-    }
-
-    #dialog {
-        width: 80%;
-        height: 90%;
-        background: $surface;
-        padding: 1 2;
-    }
-
-    #dialog-content {
-        overflow-y: auto;
-        height: 1fr;
-    }
-
     #item-header {
         height: auto;
         width: 100%;
@@ -211,17 +195,6 @@ class ShopItem(ModalScreen):
         height: auto;
         margin: 1 0;
     }
-
-    #button-container {
-        height: auto;
-        dock: bottom;
-        align-horizontal: center;
-        padding: 1 0;
-    }
-
-    #button-container Button {
-        margin: 0 2;
-    }
     """
 
     def __init__(self, image_path, shop_item, shop_data, **kwargs):
@@ -244,42 +217,40 @@ class ShopItem(ModalScreen):
             groups.setdefault(tag, []).append(item)
         return groups
 
-    def compose(self) -> ComposeResult:
+    def compose_content(self) -> ComposeResult:
         price = self._shop_item["ticket_cost"]["base_cost"]
         sale = self._shop_item["sale_percentage"]
         stock = self._shop_item["stock"]
         price_line = build_price_line(price, sale)
         stock_display = f"  ·  Stock: {stock}" if stock is not None else ""
 
-        with Vertical(id="dialog"):
-            with Vertical(id="dialog-content"):
-                with Vertical(id="item-header"):
-                    if self._image_path:
-                        with Horizontal(id="item-image-row"):
-                            yield Image(self._image_path, id="item-image")
-                    yield Static(f"[bold]{self._shop_item['name']}[/bold]", id="item-title")
-                yield Static(f"{price_line}{stock_display}", id="item-info")
-                if self._shop_item.get("description"):
-                    yield Static(self._shop_item["description"], id="item-description")
-                if self._shop_item.get("long_description"):
-                    yield Markdown(self._shop_item["long_description"], id="item-long-description")
+        with Vertical(id="item-header"):
+            if self._image_path:
+                with Horizontal(id="item-image-row"):
+                    yield Image(self._image_path, id="item-image")
+            yield Static(f"[bold]{self._shop_item['name']}[/bold]", id="item-title")
+        yield Static(f"{price_line}{stock_display}", id="item-info")
+        if self._shop_item.get("description"):
+            yield Static(self._shop_item["description"], id="item-description")
+        if self._shop_item.get("long_description"):
+            yield Markdown(self._shop_item["long_description"], id="item-long-description")
 
-                sub_items = self._get_sub_items()
-                if sub_items:
-                    groups = self._group_sub_items(sub_items)
-                    for tag, items in groups.items():
-                        with Vertical(classes="accessory-group"):
-                            yield Static(f"[bold]{tag.replace('_', ' ').title()}[/bold]", classes="accessory-group-title")
-                            for item in items:
-                                item_price = item["ticket_cost"]["base_cost"]
-                                item_sale = item.get("sale_percentage")
-                                yield SubItemRow(item["name"], item_price, item_sale)
+        sub_items = self._get_sub_items()
+        if sub_items:
+            groups = self._group_sub_items(sub_items)
+            for tag, items in groups.items():
+                with Vertical(classes="accessory-group"):
+                    yield Static(f"[bold]{tag.replace('_', ' ').title()}[/bold]", classes="accessory-group-title")
+                    for item in items:
+                        item_price = item["ticket_cost"]["base_cost"]
+                        item_sale = item.get("sale_percentage")
+                        yield SubItemRow(item["name"], item_price, item_sale)
 
-            yield Horizontal(
-                Button("Open on Web", variant="primary", id="open-web"),
-                Button("Close", variant="primary", id="close"),
-                id="button-container",
-            )
+    def compose_footer(self) -> ComposeResult:
+        return [
+            Button("Open on Web", variant="primary", id="open-web"),
+            Button("Close", variant="primary", id="close")
+        ]
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "open-web":
