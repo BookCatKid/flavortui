@@ -112,6 +112,27 @@ class DevlogRow(Vertical):
         yield Markdown(
             f"{self._devlog['body']}"
         )
+        for comment in self._devlog["comments"]:
+            yield DevlogComment(comment)
+
+class DevlogComment(Vertical):
+    DEFAULT_CSS = """
+    DevlogComment {
+        width: 100%;
+        height: auto;
+        border: round $secondary;
+    }
+    """
+
+    def __init__(self, comment, **kwargs):
+        super().__init__(**kwargs)
+        self._comment = comment
+
+    def compose(self):
+        yield Markdown(
+            f"{self._comment['author']['display_name']}\n\n{self._comment['body']}"
+        )
+
 
 class ProjectItem(PopupModal):
 
@@ -192,10 +213,7 @@ class ProjectItem(PopupModal):
 
     .loading {
         text-align: center;
-        # text-style: bold;
-        # color: $text;
         margin: 2 0;
-        # height: auto;
     }
     """
 
@@ -272,12 +290,9 @@ class Projects(Vertical):
         height: auto;
     }
 
-    ProjectCard .loading {
+    Projects .loading {
         text-align: center;
-        text-style: bold;
-        color: $text;
         margin: 2 0;
-        height: auto;
     }
 
     Projects #projects-grid {

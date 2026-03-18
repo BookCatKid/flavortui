@@ -57,10 +57,7 @@ class Kitchen(Vertical):
 
     Kitchen #loading {
         text-align: center;
-        text-style: bold;
-        color: $text;
         margin: 2 0;
-        height: auto;
     }
 
     Kitchen Rule {
