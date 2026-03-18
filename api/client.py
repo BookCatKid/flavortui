@@ -6,12 +6,17 @@ import hashlib
 
 CACHE_DIR = ".cache"
 
+
+class OfflineError(Exception):
+    pass
+
 class ApiClient:
     def __init__(self, api_key):
         self.api_key = api_key
         self.base_url = "https://flavortown.hackclub.com/api/v1"
         self.headers = {"Authorization": f"Bearer {api_key}",
                         "X-Flavortown-Ext-16596": "true"}
+        self.is_offline = False
 
         self._ensure_cache_dir()
 
@@ -64,6 +69,12 @@ class ApiClient:
             else:
                 return self.rate_limits["store_id"]
 
+        if base == "projects":
+            if len(parts) == 1:
+                return self.rate_limits["projects"]
+            else:
+                return self.rate_limits["projects_id"]
+
         # add other bases here later
 
         return self.rate_limits["default"]
@@ -75,7 +86,14 @@ class ApiClient:
                 return cached_file["status_code"], cached_file["data"]
 
         url = f"{self.base_url}/{endpoint}"
-        response = requests.get(url, headers=self.headers)
+        try:
+            response = requests.get(url, headers=self.headers)
+        except requests.ConnectionError:
+            self.is_offline = True
+            if cached_file:
+                return cached_file["status_code"], cached_file["data"]
+            raise OfflineError("Could not connect to the Flavortown server.")
+        self.is_offline = False
         data = response.json()
         if cache:
             self._save_to_cache(endpoint, data, response.status_code)
@@ -83,8 +101,11 @@ class ApiClient:
 
     def fetch_image(self, url):
         if not os.path.exists(self._get_cache_file(url, url.split(".")[-1])):
-            response = requests.get(url)
-            response.raise_for_status()
+            try:
+                response = requests.get(url)
+                response.raise_for_status()
+            except requests.ConnectionError:
+                raise OfflineError("Could not connect to the Flavortown server.")
             with open(self._get_cache_file(url, url.split(".")[-1]), "wb") as f:
                 f.write(response.content)
         return self._get_cache_file(url, url.split(".")[-1])

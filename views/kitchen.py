@@ -6,6 +6,7 @@ from textual.worker import Worker, get_current_worker
 from components.sidebar import Sidebar
 from api.api import get_user
 from api.api_key import get_api_key
+from api.functions import format_seconds
 
 
 BANNER = """
@@ -16,12 +17,6 @@ BANNER = """
 ██║     ███████╗██║  ██║ ╚████╔╝ ╚██████╔╝██║  ██║   ██║   ╚██████╔╝╚███╔███╔╝██║ ╚████║
 ╚═╝     ╚══════╝╚═╝  ╚═╝  ╚═══╝   ╚═════╝ ╚═╝  ╚═╝   ╚═╝    ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝
 """
-
-
-def _format_seconds(seconds):
-    hours = seconds // 3600
-    minutes = (seconds % 3600) // 60
-    return f"{hours}h {minutes}m"
 
 
 class StatCard(Static):
@@ -94,13 +89,14 @@ class Kitchen(Vertical):
         yield Footer()
 
     def on_mount(self) -> None:
-        self.run_worker(self._load_user, thread=True)
+        self.run_worker(self._load_user, thread=True, exit_on_error=False)
 
     def _load_user(self) -> None:
         user = get_user(get_api_key())[1]
         self.app.call_from_thread(self._render_user, user)
 
     def _render_user(self, user) -> None:
+        self.app.update_offline_banner()
         loading = self.query_one("#loading", Static)
         loading.remove()
         greeting = self.query_one("#greeting", Static)
@@ -123,7 +119,7 @@ class Kitchen(Vertical):
 
         grid2 = Grid(id="stats-grid-2")
         self.mount(grid2, before=footer)
-        grid2.mount(StatCard(f"🕐\n[bold]{_format_seconds(user['devlog_seconds_total'])}[/bold]\nTotal Devlog Time"))
-        grid2.mount(StatCard(f"🕐\n[bold]{_format_seconds(user['devlog_seconds_today'])}[/bold]\nTime Today"))
+        grid2.mount(StatCard(f"🕐\n[bold]{format_seconds(user['devlog_seconds_total'])}[/bold]\nTotal Devlog Time"))
+        grid2.mount(StatCard(f"🕐\n[bold]{format_seconds(user['devlog_seconds_today'])}[/bold]\nTime Today"))
 
         self.mount(Rule(), before=footer)

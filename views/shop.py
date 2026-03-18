@@ -1,7 +1,7 @@
 from textual.app import ComposeResult
 from textual.containers import Vertical, Grid, Horizontal
 from textual.screen import ModalScreen
-from textual.widgets import Footer, Markdown, Static, Select, Input, Button, Label
+from textual.widgets import Footer, Markdown, Static, Select, Input, Button
 from textual_image.widget import Image
 
 from components.sidebar import Sidebar
@@ -21,7 +21,7 @@ def build_price_line(price: float, sale_percentage: float | None) -> str:
     if sale_percentage:
         real_price = price * (1 - sale_percentage / 100)
         return (
-            f"[italic][strike]{format_price(price)} 🍪[/strike][/italic]\t"
+            f"[dim][italic][strike]{format_price(price)} 🍪[/strike][/italic][/dim]\t"
             f"[green]{format_price(real_price)} 🍪[/green]"
         )
     return f"{format_price(price)} 🍪"
@@ -348,7 +348,7 @@ class Shop(Vertical):
     def on_mount(self):
         self._cards = []
         self._reverse_sort = False
-        self.run_worker(self._load_store, thread=True)
+        self.run_worker(self._load_store, thread=True, exit_on_error=False)
 
     def _load_store(self):
         api_key = get_api_key()
@@ -364,6 +364,7 @@ class Shop(Vertical):
         self.app.call_from_thread(self._on_store_loaded, cards_data, shop)
 
     def _on_store_loaded(self, cards_data, shop_data):
+        self.app.update_offline_banner()
         self.query_one("#loading", Static).remove()
         footer = self.query_one(Footer)
         self.mount(Input(placeholder="Search Items...", id="search-input"), before=footer)
