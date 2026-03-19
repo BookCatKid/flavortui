@@ -1,7 +1,7 @@
 from textual.app import ComposeResult
 from textual.containers import Vertical, Grid, Horizontal
 from textual.widgets import Footer, Markdown, Static, Select, Input, Button
-from components.image_wrapper import ImageWrapper
+from components.image_wrapper import SettingsImage
 
 from components.sidebar import Sidebar
 from components.popup_modal import PopupModal
@@ -84,7 +84,9 @@ class ShopCard(Vertical):
         return build_shop_text(self._name, self._price, self._sale_percentage, self._stock)
 
     def compose(self) -> ComposeResult:
-        yield ImageWrapper(self._image_path, self.app, classes="shop-image")
+        img = SettingsImage(self._image_path, self.app, classes="shop-image")
+        if img:
+            yield img
         yield Static(self._build_text(), classes="shop-text")
 
     def set_region(self, region: str) -> None:
@@ -225,9 +227,10 @@ class ShopItem(PopupModal):
         stock_display = f"  ·  Stock: {stock}" if stock is not None else ""
 
         with Vertical(id="item-header"):
-            if self._image_path:
+            img = SettingsImage(self._image_path, self.app, id="item-image") if self._image_path else None
+            if img:
                 with Horizontal(id="item-image-row"):
-                    yield SettingsImage(self._image_path, self.app, id="item-image")
+                    yield img
             yield Static(f"[bold]{self._shop_item['name']}[/bold]", id="item-title")
         yield Static(f"{price_line}{stock_display}", id="item-info")
         if self._shop_item.get("description"):

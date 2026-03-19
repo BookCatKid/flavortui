@@ -1,7 +1,7 @@
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, Grid
 from textual.widgets import Footer, Markdown, Static, Button
-from components.image_wrapper import ImageWrapper
+from components.image_wrapper import SettingsImage
 from components.sidebar import Sidebar
 from components.popup_modal import PopupModal
 
@@ -72,8 +72,10 @@ class ProjectCard(Vertical):
         self._project = project
 
     def compose(self) -> ComposeResult:
-        with Horizontal(classes="image-row"):
-            yield ImageWrapper(self._image_path, self.app)
+        img = SettingsImage(self._image_path, self.app)
+        if img:
+            with Horizontal(classes="image-row"):
+                yield img
         yield Markdown(build_project_md(
             self._project["title"],
             self._project["description"],
@@ -230,9 +232,10 @@ class ProjectItem(PopupModal):
         updated_at = self._project_item["updated_at"]
 
         with Vertical(id="project-header"):
-            if self._image_path:
+            img = SettingsImage(self._image_path, self.app, id="project-image") if self._image_path else None
+            if img:
                 with Horizontal(id="project-image-row"):
-                    yield ImageWrapper(self._image_path, self.app, id="project-image")
+                    yield img
             yield Static(f"[bold]{name}[/bold]", id="project-title")
         yield Markdown(build_project_md(
             name,
