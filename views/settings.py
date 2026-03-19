@@ -1,6 +1,6 @@
 from textual.app import ComposeResult
 from textual.containers import Vertical, Horizontal
-from textual.widgets import Footer, Static, Button
+from textual.widgets import Footer, Static, Button, Select
 
 from components.api_key_input import ApiKeyInput
 from components.sidebar import Sidebar
@@ -51,6 +51,9 @@ class Settings(Vertical):
             with Horizontal():
                 yield Static("Api key")
                 yield Button("Edit Api Key", id="edit-api-key")
+            with Horizontal():
+                yield Static("Image rendering mode")
+                yield Select([("Auto", "auto"), ("Terminal Graphics Protocol (TGP)", "tgp"), ("Unicode Half-Cell", "halfcell"), ("Sixel", "sixel"), ("Unicode", "unicode")], prompt="Image rendering mode", value=self.app.settings["image_mode"], id="image-rendering-input")
         yield Footer()
 
     def on_button_pressed(self, event):
@@ -58,3 +61,7 @@ class Settings(Vertical):
             if isinstance(self.app.screen, ApiKeyInput):
                 self.app.pop_screen()
             self.app.push_screen(ApiKeyInput(lambda: None))
+
+    def on_select_changed(self, event):
+        if event.select.id == "image-rendering-input":
+            self.app.update_setting("image_mode", event.value)

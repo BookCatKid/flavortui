@@ -1,7 +1,15 @@
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, Grid
 from textual.widgets import Footer, Markdown, Static, Button
-from textual_image.widget import Image
+from textual_image.widget import Image, HalfcellImage, SixelImage, UnicodeImage, TGPImage
+
+IMAGE_WIDGETS = {
+    "auto": Image,
+    "halfcell": HalfcellImage,
+    "sixel": SixelImage,
+    "unicode": UnicodeImage,
+    "tgp": TGPImage,
+}
 
 from components.sidebar import Sidebar
 from components.popup_modal import PopupModal
@@ -74,7 +82,8 @@ class ProjectCard(Vertical):
 
     def compose(self) -> ComposeResult:
         with Horizontal(classes="image-row"):
-            yield Image(self._image_path)
+            ImageWidget = IMAGE_WIDGETS.get(self.app.settings.get("image_mode", "auto"), Image)
+            yield ImageWidget(self._image_path)
         yield Markdown(build_project_md(
             self._project["title"],
             self._project["description"],
