@@ -9,6 +9,9 @@ IMAGE_WIDGETS = {
 }
 
 
-def ImageWrapper(image_path, app, **kwargs):
-    ImageClass = IMAGE_WIDGETS.get(app.settings.get("image_mode", "auto"), Image)
+def SettingsImage(image_path, app, **kwargs):
+    mode = app.settings.get("image_mode", "auto")
+    if mode == "none":
+        return None
+    ImageClass = IMAGE_WIDGETS.get(mode, Image)
     return ImageClass(image_path, **kwargs)

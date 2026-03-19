@@ -63,7 +63,7 @@ class Settings(Vertical):
 
         with Vertical(classes="section"):
             yield Static("Display", classes="section-title")
-            yield Static("Choose how images are rendered in the terminal. Some terminals will not support specific protocols, and will render weirdly when forced to use them. Auto will automatically find the best rendering option for your terminal. If you are experiencing lag, you might want to try different options and see what's best.", classes="setting-description")
+            yield Static("Choose how images are rendered in the terminal. Some terminals will not support specific protocols, and will render weirdly when forced to use them. Auto will automatically find the best rendering option for your terminal. If you are experiencing lag, you might want to try different options and see what's best. Worst case scenario, they can be completely disabled!", classes="setting-description")
             with Horizontal(classes="setting-row"):
                 yield Static("Rendering mode", classes="setting-label")
                 yield Select(
@@ -73,6 +73,7 @@ class Settings(Vertical):
                         ("Unicode Half-Cell", "halfcell"),
                         ("Sixel", "sixel"),
                         ("Unicode", "unicode"),
+                        ("None!", "none")
                     ],
                     prompt="Image rendering mode",
                     value=self.app.settings["image_mode"],
