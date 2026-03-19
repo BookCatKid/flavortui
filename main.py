@@ -14,6 +14,7 @@ from views.settings import Settings
 from api.api_key import get_api_key, save_api_key, delete_api_key
 from api.api import check_api_key
 from api.client import OfflineError, get_client
+from api.settings import load_settings, save_settings
 
 
 class FlavortownTUI(App):
@@ -54,6 +55,14 @@ class FlavortownTUI(App):
         margin: 0 1;
     }
     """
+
+    def __init__(self):
+        super().__init__()
+        self.settings = load_settings()
+
+    def update_setting(self, key: str, value) -> None:
+        self.settings[key] = value
+        save_settings(self.settings)
 
     def compose(self) -> ComposeResult:
         yield Static("⚡ Offline: using cached data", id="offline-banner")
