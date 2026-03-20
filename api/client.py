@@ -3,6 +3,7 @@ import json
 import os
 import requests
 import hashlib
+import threading
 
 CACHE_DIR = ".cache"
 
@@ -11,8 +12,9 @@ class OfflineError(Exception):
     pass
 
 class ApiClient:
-    def __init__(self, api_key):
+    def __init__(self, api_key, settings=None):
         self.api_key = api_key
+        self.settings = settings or {}
         self.base_url = "https://flavortown.hackclub.com/api/v1"
         self.headers = {"Authorization": f"Bearer {api_key}",
                         "X-Flavortown-Ext-16596": "true"}
@@ -38,6 +40,7 @@ class ApiClient:
         return os.path.join(CACHE_DIR, f"{hashed_key}.{format}")
 
     def _save_to_cache(self, endpoint, response, status_code):
+        self._ensure_cache_dir()
         file_name = self._get_cache_file(endpoint, "json")
         with open(file_name, "w") as file:
             json.dump({
@@ -79,24 +82,40 @@ class ApiClient:
 
         return self.rate_limits["default"]
 
-    def fetch_endpoint(self, endpoint, cache=True):
+    def _revalidate(self, endpoint):
+        try:
+            response = requests.get(f"{self.base_url}/{endpoint}", headers=self.headers)
+            self._save_to_cache(endpoint, response.json(), response.status_code)
+        except Exception:
+            pass
+
+    def fetch_endpoint(self, endpoint):
         cached_file = self._load_from_cache(endpoint)
-        if cache and cached_file:
-            if time.time() - cached_file["timestamp"] < self._get_endpoint_rate_limit(endpoint):
+        caching_strategy = self.settings.get("caching_strategy", "timed")
+        if cached_file:
+            # default caching
+            if time.time() - cached_file["timestamp"] < self._get_endpoint_rate_limit(endpoint) and caching_strategy == "timed":
+                return cached_file["status_code"], cached_file["data"]
+            # extended caching
+            if time.time() - cached_file["timestamp"] < self._get_endpoint_rate_limit(endpoint) * 15 and caching_strategy == "extended":
+                return cached_file["status_code"], cached_file["data"]
+            # swr caching
+            if caching_strategy == "swr":
+                threading.Thread(target=self._revalidate, args=(endpoint,), daemon=True).start()
                 return cached_file["status_code"], cached_file["data"]
 
         url = f"{self.base_url}/{endpoint}"
+
         try:
             response = requests.get(url, headers=self.headers)
-        except requests.ConnectionError:
+        except requests.ConnectionError as e:
             self.is_offline = True
             if cached_file:
                 return cached_file["status_code"], cached_file["data"]
-            raise OfflineError("Could not connect to the Flavortown server.")
+            raise OfflineError("Could not connect to the Flavortown server.") from e
         self.is_offline = False
         data = response.json()
-        if cache:
-            self._save_to_cache(endpoint, data, response.status_code)
+        self._save_to_cache(endpoint, data, response.status_code)
         return response.status_code, data
 
     def fetch_image(self, url):
@@ -112,8 +131,10 @@ class ApiClient:
 
 _global_client = None
 
-def get_client(api_key):
+def get_client(api_key, settings=None):
     global _global_client
     if not _global_client or _global_client.api_key != api_key:
-        _global_client = ApiClient(api_key)
+        _global_client = ApiClient(api_key, settings)
+    elif settings is not None:
+        _global_client.settings = settings
     return _global_client

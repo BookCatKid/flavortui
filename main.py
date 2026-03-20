@@ -79,7 +79,7 @@ class FlavortownTUI(App):
 
     def update_offline_banner(self) -> None:
         try:
-            client = get_client(get_api_key())
+            client = get_client(get_api_key(), self.settings)
             self.query_one("#offline-banner").set_class(client.is_offline, "-visible")
         except Exception:
             pass
