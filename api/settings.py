@@ -5,6 +5,7 @@ from platformdirs import user_config_dir
 SETTINGS_PATH = Path(user_config_dir("flavortui")) / "settings.json"
 DEFAULTS = {
     "image_mode": "auto",
+    "caching_strategy": "swr"
 }
 
 
