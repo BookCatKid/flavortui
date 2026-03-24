@@ -325,17 +325,20 @@ class Shop(Vertical):
         self.run_worker(self._load_store, thread=True, exit_on_error=False)
 
     def _load_store(self):
-        api_key = get_api_key()
-        shop = get_store(api_key)[1]
-        client = get_client(api_key)
+        try:
+            api_key = get_api_key()
+            shop = get_store(api_key)[1]
+            client = get_client(api_key)
 
-        cards_data = []
-        for item in shop:
-            if item["buyable_by_self"] and item["type"] != "ShopItem::FreeStickers":
-                image_path = client.fetch_image(item["image_url"])
-                cards_data.append((image_path, item))
+            cards_data = []
+            for item in shop:
+                if item["buyable_by_self"] and item["type"] != "ShopItem::FreeStickers":
+                    image_path = client.fetch_image(item["image_url"])
+                    cards_data.append((image_path, item))
 
-        self.app.call_from_thread(self._on_store_loaded, cards_data, shop)
+            self.app.call_from_thread(self._on_store_loaded, cards_data, shop)
+        except Exception as e:
+            self.app.call_from_thread(self._on_load_error, str(e))
 
     def _on_store_loaded(self, cards_data, shop_data):
         self.app.update_offline_banner()
@@ -377,6 +380,9 @@ class Shop(Vertical):
 
         grid.mount_all(self._cards)
         self._apply_sort("price")
+
+    def _on_load_error(self, error):
+        self.query_one("#loading", Static).update(f"Failed to load: {error}")
 
     def _apply_sort(self, sort_value) -> None:
         cards = [c for c in self._cards if c.display]

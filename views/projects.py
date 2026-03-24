@@ -315,23 +315,26 @@ class Projects(Vertical):
         self.run_worker(self._load_projects, thread=True, exit_on_error=False)
 
     def _load_projects(self):
-        api_key = get_api_key()
-        client = get_client(api_key)
-        projects = get_projects_for_user(api_key)
+        try:
+            api_key = get_api_key()
+            client = get_client(api_key)
+            projects = get_projects_for_user(api_key)
 
-        cards_data = []
-        for status_code, project in projects:
-            image_path = None
-            banner_url = project.get("banner_url")
-            if banner_url:
-                if banner_url.startswith("/"):
-                    banner_url = BASE_URL + banner_url
-                image_path = client.fetch_image(banner_url)
-            else:
-                image_path = client.fetch_image(FALLBACK_PROJECT_IMAGE)
-            cards_data.append((image_path, project))
+            cards_data = []
+            for status_code, project in projects:
+                image_path = None
+                banner_url = project.get("banner_url")
+                if banner_url:
+                    if banner_url.startswith("/"):
+                        banner_url = BASE_URL + banner_url
+                    image_path = client.fetch_image(banner_url)
+                else:
+                    image_path = client.fetch_image(FALLBACK_PROJECT_IMAGE)
+                cards_data.append((image_path, project))
 
-        self.app.call_from_thread(self._on_projects_loaded, cards_data)
+            self.app.call_from_thread(self._on_projects_loaded, cards_data)
+        except Exception as e:
+            self.app.call_from_thread(self._on_load_error, str(e))
 
     def _on_projects_loaded(self, cards_data):
         self.app.update_offline_banner()
@@ -341,3 +344,6 @@ class Projects(Vertical):
         self.mount(grid, before=footer)
         cards = [ProjectCard(image_path, project) for image_path, project in cards_data]
         grid.mount_all(cards)
+
+    def _on_load_error(self, error):
+        self.query_one(".loading", Static).update(f"Failed to load: {error}")

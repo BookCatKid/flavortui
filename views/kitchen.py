@@ -89,8 +89,14 @@ class Kitchen(Vertical):
         self.run_worker(self._load_user, thread=True, exit_on_error=False)
 
     def _load_user(self) -> None:
-        user = get_user(get_api_key())[1]
-        self.app.call_from_thread(self._render_user, user)
+        try:
+            user = get_user(get_api_key())[1]
+            self.app.call_from_thread(self._render_user, user)
+        except Exception as e:
+            self.app.call_from_thread(self._on_load_error, str(e))
+
+    def _on_load_error(self, error):
+        self.query_one("#loading", Static).update(f"Failed to load: {error}")
 
     def _render_user(self, user) -> None:
         self.app.update_offline_banner()
