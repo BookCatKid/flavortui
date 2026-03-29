@@ -7,11 +7,10 @@ from components.popup_modal import PopupModal
 
 from api.api import get_projects_for_user, get_project_devlogs
 from api.api_key import get_api_key
-from api.client import get_client
-from api.functions import format_seconds
+from api.functions import format_seconds, get_days_ago
 
 import webbrowser
-from datetime import datetime, timezone
+
 
 BASE_URL = "https://flavortown.hackclub.com"
 FALLBACK_PROJECT_IMAGE = "https://flavortown.hackclub.com/assets/default-banner-3d4e1b67.png"
@@ -19,9 +18,6 @@ STATUS_LABELS = {
     "submitted": "✅ Shipped",
     "draft": "📝 Draft",
 }
-
-def get_days_ago(utc_time_string):
-    return (datetime.now(timezone.utc) - datetime.fromisoformat(utc_time_string)).days
 
 
 def build_project_md(name, description, devlog_ids, ship_status, max_len=150, created_at="", updated_at="") -> str:
@@ -101,6 +97,7 @@ class DevlogRow(Vertical):
 
     DevlogRow Markdown {
         height: auto;
+        margin-bottom: 1;
     }
     """
 
@@ -317,19 +314,17 @@ class Projects(Vertical):
     def _load_projects(self):
         try:
             api_key = get_api_key()
-            client = get_client(api_key)
             projects = get_projects_for_user(api_key)
 
             cards_data = []
             for status_code, project in projects:
-                image_path = None
                 banner_url = project.get("banner_url")
                 if banner_url:
                     if banner_url.startswith("/"):
                         banner_url = BASE_URL + banner_url
-                    image_path = client.fetch_image(banner_url)
+                    image_path = banner_url
                 else:
-                    image_path = client.fetch_image(FALLBACK_PROJECT_IMAGE)
+                    image_path = FALLBACK_PROJECT_IMAGE
                 cards_data.append((image_path, project))
 
             self.app.call_from_thread(self._on_projects_loaded, cards_data)
