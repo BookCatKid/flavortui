@@ -2,14 +2,16 @@ from textual.app import ComposeResult
 from textual.containers import Vertical, Grid, Horizontal
 from textual.widgets import Footer, Static, TabbedContent, TabPane, Markdown, Button, Input
 from components.image_wrapper import SettingsImage
+from components.popup_modal import PopupModal
 
 from components.sidebar import Sidebar
 from views.projects import ProjectCard, DevlogRow, BASE_URL, FALLBACK_PROJECT_IMAGE
+from views.kitchen import StatCard
 
-
-
-from api.api import get_devlogs, get_projects, get_users
+from api.api import get_devlogs, get_projects, get_users, get_user, get_projects_for_user
 from api.api_key import get_api_key
+from api.functions import format_seconds
+import webbrowser
 
 def build_users_md(display_name, cookies, project_ids):
     project_count = len(project_ids)
@@ -62,6 +64,162 @@ class UserCard(Vertical):
             self._user["cookies"],
             self._user["project_ids"]
         ))
+
+    def _on_click(self, event):
+        self.app.push_screen(UserItem(self._image_path, self._user))
+
+
+class UserItem(PopupModal):
+    DEFAULT_CSS = """
+    #user-header {
+        width: 100%;
+        height: auto;
+    }
+
+    #user-image-row {
+        width: 100%;
+        height: auto;
+        align: center middle;
+    }
+
+    #user-image {
+        width: auto;
+        height: 12;
+        min-height: 12;
+        max-height: 12;
+    }
+
+    #user-title {
+        text-align: center;
+        text-style: bold;
+        width: 100%;
+        height: auto;
+        margin: 1 0;
+    }
+
+    #user-overview {
+        width: 100%;
+        height: auto;
+        text-align: center;
+        margin: 0 0 1 0;
+    }
+
+    #user-stats-grid {
+        grid-size: 4;
+        grid-gutter: 1 2;
+        margin: 1 0;
+        height: auto;
+    }
+
+    #user-stats-grid-2 {
+        grid-size: 2;
+        grid-gutter: 1 2;
+        margin: 1 0;
+        height: auto;
+    }
+
+    #user-projects-title {
+        text-align: center;
+        text-style: bold;
+        width: 100%;
+        height: auto;
+        margin: 1 0;
+    }
+
+    #user-projects-grid {
+        grid-size: 2;
+        grid-gutter: 1 2;
+        height: auto;
+    }
+
+    .loading {
+        text-align: center;
+        margin: 2 0;
+    }
+    """
+
+    def __init__(self, image_path, user, **kwargs):
+        super().__init__(**kwargs)
+        self._image_path = image_path
+        self._user = user
+
+    def compose_content(self) -> ComposeResult:
+        with Vertical(id="user-header"):
+            img = SettingsImage(self._image_path, self.app, id="user-image")
+            if img:
+                with Horizontal(id="user-image-row"):
+                    yield img
+            yield Static(f"[bold]{self._user['display_name']}[/bold]", id="user-title")
+        yield Markdown(build_users_md(
+            self._user["display_name"],
+            self._user["cookies"],
+            self._user["project_ids"]
+        ), id="user-overview")
+        yield Static("Loading...", classes="loading")
+        yield Grid(id="user-stats-grid")
+        yield Grid(id="user-stats-grid-2")
+        yield Static("Projects", id="user-projects-title")
+        yield Grid(id="user-projects-grid")
+
+    def compose_footer(self) -> ComposeResult:
+        return [
+            Button("Open on Web", variant="primary", id="open-web"),
+            Button("Close", variant="primary", id="close"),
+        ]
+
+    def on_mount(self):
+        self.run_worker(self._load_user, thread=True, exit_on_error=False)
+
+    def _load_user(self):
+        try:
+            api_key = get_api_key()
+            user = get_user(api_key, self._user["id"])[1]
+            projects = get_projects_for_user(api_key, self._user["id"])
+
+            cards_data = []
+            for status_code, project in projects:
+                if status_code != 200:
+                    continue
+                banner_url = project.get("banner_url")
+                if banner_url:
+                    if banner_url.startswith("/"):
+                        banner_url = BASE_URL + banner_url
+                    image_path = banner_url
+                else:
+                    image_path = FALLBACK_PROJECT_IMAGE
+                cards_data.append((image_path, project))
+
+            self.app.call_from_thread(self._on_user_loaded, user, cards_data)
+        except Exception as e:
+            self.app.call_from_thread(self._on_load_error, str(e))
+
+    def _on_user_loaded(self, user, cards_data):
+        self.query_one(".loading", Static).remove()
+
+        stats = self.query_one("#user-stats-grid", Grid)
+        stats.mount(StatCard(f"🍪\n\n[bold]{user.get('cookies') or 0}[/bold] Cookies"))
+        stats.mount(StatCard(f"👍\n\n[bold]{user.get('vote_count', 0)}[/bold] Votes"))
+        stats.mount(StatCard(f"💜\n\n[bold]{user.get('like_count', 0)}[/bold] Likes"))
+        stats.mount(StatCard(f"📁\n\n[bold]{len(user.get('project_ids', []))}[/bold] Projects"))
+
+        stats2 = self.query_one("#user-stats-grid-2", Grid)
+        stats2.mount(StatCard(f"🕐\n[bold]{format_seconds(user.get('devlog_seconds_total', 0))}[/bold]\nTotal Devlog Time"))
+        stats2.mount(StatCard(f"🕐\n[bold]{format_seconds(user.get('devlog_seconds_today', 0))}[/bold]\nTime Today"))
+
+        projects_grid = self.query_one("#user-projects-grid", Grid)
+        if cards_data:
+            projects_grid.mount_all([ProjectCard(image_path, project) for image_path, project in cards_data])
+        else:
+            projects_grid.mount(Static("No projects yet."))
+
+    def _on_load_error(self, error):
+        self.query_one(".loading", Static).update(f"Failed to load: {error}")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "open-web":
+            webbrowser.open(f"https://flavortown.hackclub.com/users/{self._user['id']}")
+            return
+        self.app.pop_screen()
 
 CHUNK_SIZE = 20
 
@@ -202,9 +360,9 @@ class Explore(Vertical):
 
     def _on_devlogs_loaded(self):
         self.query_one("#devlogs-pane .loading", Static).display = False
-        self.query_one("#devlogs-load-more").display = True
+        self.query_one("#devlogs-load-more").display = self._devlogs_offset + CHUNK_SIZE < len(self._all_devlogs)
         grid = self.query_one("#devlogs-grid", Grid)
-        cards = [DevlogRow(devlog) for devlog in self._all_devlogs][self._devlogs_offset:self._devlogs_offset+20]
+        cards = [DevlogRow(devlog) for devlog in self._all_devlogs][self._devlogs_offset:self._devlogs_offset+CHUNK_SIZE]
         grid.mount_all(cards)
         self._devlogs_loaded = True
 
@@ -227,9 +385,9 @@ class Explore(Vertical):
 
     def _on_users_loaded(self):
         self.query_one("#users-pane .loading", Static).display = False
-        self.query_one("#users-load-more").display = True
+        self.query_one("#users-load-more").display = self._users_offset + CHUNK_SIZE < len(self._all_users)
         grid = self.query_one("#users-grid", Grid)
-        cards = [UserCard(image_path, user) for image_path, user in self._all_users][self._users_offset:self._users_offset+20]
+        cards = [UserCard(image_path, user) for image_path, user in self._all_users][self._users_offset:self._users_offset+CHUNK_SIZE]
         grid.mount_all(cards)
         self._users_loaded = True
 
@@ -246,11 +404,13 @@ class Explore(Vertical):
         self._on_projects_loaded()
 
     def _show_next_devlogs_chunk(self):
-        self._devlogs_offset += 20
+        if self._devlogs_offset + CHUNK_SIZE >= len(self._all_devlogs):
+            return
+        self._devlogs_offset += CHUNK_SIZE
         self._on_devlogs_loaded()
 
     def _show_next_users_chunk(self):
-        self._users_offset += 20
+        self._users_offset += CHUNK_SIZE
         self._on_users_loaded()
 
     def on_button_pressed(self, event):
