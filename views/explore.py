@@ -149,11 +149,6 @@ class UserItem(PopupModal):
                 with Horizontal(id="user-image-row"):
                     yield img
             yield Static(f"[bold]{self._user['display_name']}[/bold]", id="user-title")
-        yield Markdown(build_users_md(
-            self._user["display_name"],
-            self._user["cookies"],
-            self._user["project_ids"]
-        ), id="user-overview")
         yield Static("Loading...", classes="loading")
         yield Grid(id="user-stats-grid")
         yield Grid(id="user-stats-grid-2")
