@@ -1,5 +1,4 @@
 from textual.app import ComposeResult
-from textual.containers import Horizontal
 from textual.widgets import Static, Input, Button
 
 from components.popup_modal import PopupModal
