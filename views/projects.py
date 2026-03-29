@@ -13,18 +13,30 @@ import webbrowser
 
 
 BASE_URL = "https://flavortown.hackclub.com"
-FALLBACK_PROJECT_IMAGE = "https://flavortown.hackclub.com/assets/default-banner-3d4e1b67.png"
+FALLBACK_PROJECT_IMAGE = (
+    "https://flavortown.hackclub.com/assets/default-banner-3d4e1b67.png"
+)
 STATUS_LABELS = {
     "submitted": "✅ Shipped",
     "draft": "📝 Draft",
 }
 
 
-def build_project_md(name, description, devlog_ids, ship_status, max_len=150, created_at="", updated_at="") -> str:
+def build_project_md(
+    name,
+    description,
+    devlog_ids,
+    ship_status,
+    max_len=150,
+    created_at="",
+    updated_at="",
+) -> str:
     status = STATUS_LABELS.get(ship_status, ship_status)
     devlog_count = len(devlog_ids)
     devlog_label = "devlog" if devlog_count == 1 else "devlogs"
-    short_desc = f"{description[:max_len]}…" if len(description) > max_len else description
+    short_desc = (
+        f"{description[:max_len]}…" if len(description) > max_len else description
+    )
     if created_at and updated_at:
         timing = f"Created {get_days_ago(created_at)} days ago, Updated {get_days_ago(updated_at)} days ago"
     else:
@@ -72,17 +84,20 @@ class ProjectCard(Vertical):
         if img:
             with Horizontal(classes="image-row"):
                 yield img
-        yield Markdown(build_project_md(
-            self._project["title"],
-            self._project["description"],
-            self._project["devlog_ids"],
-            self._project["ship_status"],
-            created_at=self._project["created_at"],
-            updated_at=self._project["updated_at"]
-        ))
+        yield Markdown(
+            build_project_md(
+                self._project["title"],
+                self._project["description"],
+                self._project["devlog_ids"],
+                self._project["ship_status"],
+                created_at=self._project["created_at"],
+                updated_at=self._project["updated_at"],
+            )
+        )
 
     def _on_click(self, event):
         self.app.push_screen(ProjectItem(self._image_path, self._project))
+
 
 class DevlogRow(Vertical):
     DEFAULT_CSS = """
@@ -106,12 +121,13 @@ class DevlogRow(Vertical):
         self._devlog = devlog
 
     def compose(self) -> ComposeResult:
-        yield Static(f"{self._devlog['likes_count']} likes · {format_seconds(self._devlog['duration_seconds'])}\n\n")
-        yield Markdown(
-            f"{self._devlog['body']}"
+        yield Static(
+            f"{self._devlog['likes_count']} likes · {format_seconds(self._devlog['duration_seconds'])}\n\n"
         )
+        yield Markdown(f"{self._devlog['body']}")
         for comment in self._devlog["comments"]:
             yield DevlogComment(comment)
+
 
 class DevlogComment(Vertical):
     DEFAULT_CSS = """
@@ -133,7 +149,6 @@ class DevlogComment(Vertical):
 
 
 class ProjectItem(PopupModal):
-
     DEFAULT_CSS = """
     #project-header {
         height: auto;
@@ -229,27 +244,33 @@ class ProjectItem(PopupModal):
         updated_at = self._project_item["updated_at"]
 
         with Vertical(id="project-header"):
-            img = SettingsImage(self._image_path, self.app, id="project-image") if self._image_path else None
+            img = (
+                SettingsImage(self._image_path, self.app, id="project-image")
+                if self._image_path
+                else None
+            )
             if img:
                 with Horizontal(id="project-image-row"):
                     yield img
             yield Static(f"[bold]{name}[/bold]", id="project-title")
-        yield Markdown(build_project_md(
-            name,
-            description,
-            devlog_ids,
-            ship_status,
-            float('inf'),
-            created_at,
-            updated_at
-        ))
+        yield Markdown(
+            build_project_md(
+                name,
+                description,
+                devlog_ids,
+                ship_status,
+                float("inf"),
+                created_at,
+                updated_at,
+            )
+        )
         yield Static("Loading...", classes="loading")
         yield Vertical(id="devlogs-container")
 
     def compose_footer(self) -> ComposeResult:
         return [
             Button("Open on Web", variant="primary", id="open-web"),
-            Button("Close", variant="primary", id="close")
+            Button("Close", variant="primary", id="close"),
         ]
 
     def on_mount(self):
@@ -268,13 +289,14 @@ class ProjectItem(PopupModal):
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "open-web":
-            webbrowser.open(f"https://flavortown.hackclub.com/projects/{self._project_item['id']}")
+            webbrowser.open(
+                f"https://flavortown.hackclub.com/projects/{self._project_item['id']}"
+            )
         else:
             self.app.pop_screen()
 
 
 class Projects(Vertical):
-
     DEFAULT_CSS = """
     Projects {
         layers: sidebar;

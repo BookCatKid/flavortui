@@ -12,13 +12,16 @@ CACHE_DIR = ".cache"
 class OfflineError(Exception):
     pass
 
+
 class ApiClient:
     def __init__(self, api_key, settings=None):
         self.api_key = api_key
         self.settings = settings or {}
         self.base_url = "https://flavortown.hackclub.com/api/v1"
-        self.headers = {"Authorization": f"Bearer {api_key}",
-                        "X-Flavortown-Ext-16596": "true"}
+        self.headers = {
+            "Authorization": f"Bearer {api_key}",
+            "X-Flavortown-Ext-16596": "true",
+        }
         self.is_offline = False
 
         self._ensure_cache_dir()
@@ -44,11 +47,14 @@ class ApiClient:
         self._ensure_cache_dir()
         file_name = self._get_cache_file(endpoint, "json")
         with open(file_name, "w") as file:
-            json.dump({
-                "timestamp": time.time(),
-                "data": response,
-                "status_code": status_code
-            }, file)
+            json.dump(
+                {
+                    "timestamp": time.time(),
+                    "data": response,
+                    "status_code": status_code,
+                },
+                file,
+            )
 
     def _load_from_cache(self, endpoint):
         file_name = self._get_cache_file(endpoint, "json")
@@ -95,15 +101,27 @@ class ApiClient:
         caching_strategy = self.settings.get("caching_strategy", "timed")
         if cached_file:
             # default caching
-            if time.time() - cached_file["timestamp"] < self._get_endpoint_rate_limit(endpoint) and caching_strategy == "timed":
+            if (
+                time.time() - cached_file["timestamp"]
+                < self._get_endpoint_rate_limit(endpoint)
+                and caching_strategy == "timed"
+            ):
                 return cached_file["status_code"], cached_file["data"]
             # extended caching
-            if time.time() - cached_file["timestamp"] < self._get_endpoint_rate_limit(endpoint) * 15 and caching_strategy == "extended":
+            if (
+                time.time() - cached_file["timestamp"]
+                < self._get_endpoint_rate_limit(endpoint) * 15
+                and caching_strategy == "extended"
+            ):
                 return cached_file["status_code"], cached_file["data"]
             # swr caching
             if caching_strategy == "swr":
-                if time.time() - cached_file["timestamp"] >= self._get_endpoint_rate_limit(endpoint):
-                    threading.Thread(target=self._revalidate, args=(endpoint,), daemon=True).start()
+                if time.time() - cached_file[
+                    "timestamp"
+                ] >= self._get_endpoint_rate_limit(endpoint):
+                    threading.Thread(
+                        target=self._revalidate, args=(endpoint,), daemon=True
+                    ).start()
                 return cached_file["status_code"], cached_file["data"]
 
         url = f"{self.base_url}/{endpoint}"
@@ -132,7 +150,9 @@ class ApiClient:
                 f.write(response.content)
         return self._get_cache_file(url, ext)
 
+
 _global_client = None
+
 
 def get_client(api_key, settings=None):
     global _global_client

@@ -12,7 +12,6 @@ from api.api_key import get_api_key
 import webbrowser
 
 
-
 def format_price(price: float) -> str:
     return f"{price:.2f}".rstrip("0").rstrip(".")
 
@@ -27,14 +26,12 @@ def build_price_line(price: float, sale_percentage: float | None) -> str:
     return f"{format_price(price)} 🍪"
 
 
-def build_shop_text(name: str, price: float, sale_percentage: float | None, stock: int | None) -> str:
+def build_shop_text(
+    name: str, price: float, sale_percentage: float | None, stock: int | None
+) -> str:
     stock_display = f"Stock: {stock}" if stock is not None else ""
     price_line = build_price_line(price, sale_percentage)
-    return (
-        f"[bold]{name}[/bold]\n\n"
-        f"{price_line}\n"
-        f"[italic]{stock_display}[/italic]"
-    )
+    return f"[bold]{name}[/bold]\n\n{price_line}\n[italic]{stock_display}[/italic]"
 
 
 class ShopCard(Vertical):
@@ -81,7 +78,9 @@ class ShopCard(Vertical):
         self._sort_price = self._price
 
     def _build_text(self) -> str:
-        return build_shop_text(self._name, self._price, self._sale_percentage, self._stock)
+        return build_shop_text(
+            self._name, self._price, self._sale_percentage, self._stock
+        )
 
     def compose(self) -> ComposeResult:
         img = SettingsImage(self._image_path, self.app, classes="shop-image")
@@ -99,7 +98,10 @@ class ShopCard(Vertical):
         self.query_one(".shop-text", Static).update(self._build_text())
 
     def on_click(self) -> None:
-        self.app.push_screen(ShopItem(self._image_path, self._shop_item, self._shop_data))
+        self.app.push_screen(
+            ShopItem(self._image_path, self._shop_item, self._shop_data)
+        )
+
 
 class SubItemRow(Vertical):
     DEFAULT_CSS = """
@@ -123,7 +125,9 @@ class SubItemRow(Vertical):
     }
     """
 
-    def __init__(self, name: str, price: float, sale_percentage: float | None, **kwargs):
+    def __init__(
+        self, name: str, price: float, sale_percentage: float | None, **kwargs
+    ):
         super().__init__(**kwargs)
         self._name = name
         self._price = price
@@ -131,11 +135,13 @@ class SubItemRow(Vertical):
 
     def compose(self) -> ComposeResult:
         yield Static(self._name, classes="sub-item-name")
-        yield Static(build_price_line(self._price, self._sale_percentage), classes="sub-item-price")
+        yield Static(
+            build_price_line(self._price, self._sale_percentage),
+            classes="sub-item-price",
+        )
 
 
 class ShopItem(PopupModal):
-
     DEFAULT_CSS = """
     #item-header {
         height: auto;
@@ -227,7 +233,11 @@ class ShopItem(PopupModal):
         stock_display = f"  ·  Stock: {stock}" if stock is not None else ""
 
         with Vertical(id="item-header"):
-            img = SettingsImage(self._image_path, self.app, id="item-image") if self._image_path else None
+            img = (
+                SettingsImage(self._image_path, self.app, id="item-image")
+                if self._image_path
+                else None
+            )
             if img:
                 with Horizontal(id="item-image-row"):
                     yield img
@@ -236,14 +246,19 @@ class ShopItem(PopupModal):
         if self._shop_item.get("description"):
             yield Static(self._shop_item["description"], id="item-description")
         if self._shop_item.get("long_description"):
-            yield Markdown(self._shop_item["long_description"], id="item-long-description")
+            yield Markdown(
+                self._shop_item["long_description"], id="item-long-description"
+            )
 
         sub_items = self._get_sub_items()
         if sub_items:
             groups = self._group_sub_items(sub_items)
             for tag, items in groups.items():
                 with Vertical(classes="accessory-group"):
-                    yield Static(f"[bold]{tag.replace('_', ' ').title()}[/bold]", classes="accessory-group-title")
+                    yield Static(
+                        f"[bold]{tag.replace('_', ' ').title()}[/bold]",
+                        classes="accessory-group-title",
+                    )
                     for item in items:
                         item_price = item["ticket_cost"]["base_cost"]
                         item_sale = item.get("sale_percentage")
@@ -252,18 +267,19 @@ class ShopItem(PopupModal):
     def compose_footer(self) -> ComposeResult:
         return [
             Button("Open on Web", variant="primary", id="open-web"),
-            Button("Close", variant="primary", id="close")
+            Button("Close", variant="primary", id="close"),
         ]
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "open-web":
-            webbrowser.open(f"https://flavortown.hackclub.com/shop/order?shop_item_id={self._shop_item['id']}")
+            webbrowser.open(
+                f"https://flavortown.hackclub.com/shop/order?shop_item_id={self._shop_item['id']}"
+            )
         else:
             self.app.pop_screen()
 
 
 class Shop(Vertical):
-
     DEFAULT_CSS = """
     Shop {
         layers: sidebar;
@@ -344,27 +360,44 @@ class Shop(Vertical):
         self.query_one("#loading", Static).remove()
         footer = self.query_one(Footer)
 
-        self.mount(Input(placeholder="Search Items...", id="search-input"), before=footer)
-        self.mount(Horizontal(
-            Select(options=[("Name", "name"), ("Price", "price"), ("Arbitrary", "arbitrary")], prompt="Sort by", id="sort-select", value="price"),
-            Button("↑", id="flip-sort"),
-            id="sort-container"
-        ), before=footer)
-        self.mount(Select(
-            options=[
-                ("All Regions", "all"),
-                ("United States", "us"),
-                ("EU", "eu"),
-                ("United Kingdom", "uk"),
-                ("India", "in"),
-                ("Canada", "ca"),
-                ("Australia", "au"),
-                ("Rest of World", "xx"),
-            ],
-            prompt="Region",
-            id="region-select",
-            value="all",
-        ), before=footer)
+        self.mount(
+            Input(placeholder="Search Items...", id="search-input"), before=footer
+        )
+        self.mount(
+            Horizontal(
+                Select(
+                    options=[
+                        ("Name", "name"),
+                        ("Price", "price"),
+                        ("Arbitrary", "arbitrary"),
+                    ],
+                    prompt="Sort by",
+                    id="sort-select",
+                    value="price",
+                ),
+                Button("↑", id="flip-sort"),
+                id="sort-container",
+            ),
+            before=footer,
+        )
+        self.mount(
+            Select(
+                options=[
+                    ("All Regions", "all"),
+                    ("United States", "us"),
+                    ("EU", "eu"),
+                    ("United Kingdom", "uk"),
+                    ("India", "in"),
+                    ("Canada", "ca"),
+                    ("Australia", "au"),
+                    ("Rest of World", "xx"),
+                ],
+                prompt="Region",
+                id="region-select",
+                value="all",
+            ),
+            before=footer,
+        )
         grid = Grid(id="shop-grid")
         self.mount(grid, before=footer)
 
@@ -404,7 +437,9 @@ class Shop(Vertical):
             event.button.label = "↓" if self._reverse_sort else "↑"
             self._apply_sort(self.query_one("#sort-select", Select).value)
         elif event.button.id == "open-web":
-            webbrowser.open(f"https://flavortown.hackclub.com/shop/order?shop_item_id={self._shop_item['id']}")
+            webbrowser.open(
+                f"https://flavortown.hackclub.com/shop/order?shop_item_id={self._shop_item['id']}"
+            )
         elif event.button.id == "close":
             self.app.pop_screen()
 

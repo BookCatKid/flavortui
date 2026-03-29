@@ -18,7 +18,6 @@ from api.settings import load_settings, save_settings
 
 
 class FlavortownTUI(App):
-
     BINDINGS = [("s", "toggle_sidebar", "Toggle Sidebar")]
 
     show_sidebar = reactive(False)
@@ -93,7 +92,7 @@ class FlavortownTUI(App):
         "projects": Projects,
         "shop": Shop,
         "explore": Explore,
-        "settings": Settings
+        "settings": Settings,
     }
 
     def _switch_view(self, view_name: str) -> None:

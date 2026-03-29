@@ -6,7 +6,6 @@ from textual.message import Message
 
 
 class Sidebar(Widget):
-
     class Navigate(Message):
         def __init__(self, view: str) -> None:
             self.view = view
