@@ -1,4 +1,5 @@
 from api.client import get_client
+from urllib.parse import urlencode
 
 # This file is suprisingly simple for now!
 
@@ -14,7 +15,8 @@ def get_user(api_key, user_id="me"):
     return status_code, response
 
 def get_users(api_key, query="", page=1):
-    return fetch_endpoint(f"users?page={page}&query={query}", api_key)
+    params = urlencode({"page": page, "query": query})
+    return fetch_endpoint(f"users?{params}", api_key)
 
 
 # Store stuff
@@ -39,7 +41,8 @@ def get_projects_for_user(api_key, user_id="me"):
     return projects
 
 def get_projects(api_key, page=1, query=""):
-    return fetch_endpoint(f"projects?page={page}&query={query}", api_key)
+    params = urlencode({"page": page, "query": query})
+    return fetch_endpoint(f"projects?{params}", api_key)
 
 # Devlogs
 
@@ -47,7 +50,8 @@ def get_project_devlogs(api_key, project_id):
     return fetch_endpoint(f"projects/{project_id}/devlogs", api_key)
 
 def get_devlogs(api_key, page=1):
-    return fetch_endpoint(f"devlogs?page={page}", api_key)
+    params = urlencode({"page": page})
+    return fetch_endpoint(f"devlogs?{params}", api_key)
 
 # Check api key
 

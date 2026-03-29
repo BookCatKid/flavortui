@@ -55,10 +55,9 @@ class UserCard(Vertical):
         self._user = user
 
     def compose(self) -> ComposeResult:
-        img = SettingsImage(self._image_path, self.app)
         with Horizontal(classes="image-row"):
-            if img:
-                yield img
+            if self._image_path:
+                yield SettingsImage(self._image_path, self.app)
         yield Markdown(build_users_md(
             self._user["display_name"],
             self._user["cookies"],
@@ -322,7 +321,8 @@ class Explore(Vertical):
         self.query_one("#projects-pane .loading", Static).display = False
 
         grid = self.query_one("#projects-grid", Grid)
-        cards = [ProjectCard(image_path, project) for image_path, project in self._all_projects][self._projects_offset:self._projects_offset+CHUNK_SIZE]
+        visible_projects = self._all_projects[self._projects_offset:self._projects_offset+CHUNK_SIZE]
+        cards = [ProjectCard(image_path, project) for image_path, project in visible_projects]
         grid.mount_all(cards)
         self.query_one("#projects-load-more").display = self._projects_offset + CHUNK_SIZE < len(self._all_projects)
 
@@ -362,7 +362,8 @@ class Explore(Vertical):
         self.query_one("#devlogs-pane .loading", Static).display = False
         self.query_one("#devlogs-load-more").display = self._devlogs_offset + CHUNK_SIZE < len(self._all_devlogs)
         grid = self.query_one("#devlogs-grid", Grid)
-        cards = [DevlogRow(devlog) for devlog in self._all_devlogs][self._devlogs_offset:self._devlogs_offset+CHUNK_SIZE]
+        visible_devlogs = self._all_devlogs[self._devlogs_offset:self._devlogs_offset+CHUNK_SIZE]
+        cards = [DevlogRow(devlog) for devlog in visible_devlogs]
         grid.mount_all(cards)
         self._devlogs_loaded = True
 
@@ -387,7 +388,8 @@ class Explore(Vertical):
         self.query_one("#users-pane .loading", Static).display = False
         self.query_one("#users-load-more").display = self._users_offset + CHUNK_SIZE < len(self._all_users)
         grid = self.query_one("#users-grid", Grid)
-        cards = [UserCard(image_path, user) for image_path, user in self._all_users][self._users_offset:self._users_offset+CHUNK_SIZE]
+        visible_users = self._all_users[self._users_offset:self._users_offset+CHUNK_SIZE]
+        cards = [UserCard(image_path, user) for image_path, user in visible_users]
         grid.mount_all(cards)
         self._users_loaded = True
 
@@ -410,6 +412,8 @@ class Explore(Vertical):
         self._on_devlogs_loaded()
 
     def _show_next_users_chunk(self):
+        if self._users_offset + CHUNK_SIZE >= len(self._all_users):
+            return
         self._users_offset += CHUNK_SIZE
         self._on_users_loaded()
 
