@@ -8,7 +8,6 @@ from api.api import check_api_key
 
 
 class ApiKeyInput(PopupModal):
-
     DEFAULT_CSS = """
     #dialog {
         height: auto;
@@ -48,7 +47,7 @@ class ApiKeyInput(PopupModal):
             Button("Save API Key", id="save_key", variant="success"),
             Button("Print API Key", id="print_key", variant="primary"),
             Button("Delete API Key", id="delete_key", variant="error"),
-            Button("Close", id="close", variant="default")
+            Button("Close", id="close", variant="default"),
         ]
 
     def on_button_pressed(self, event: Button.Pressed):

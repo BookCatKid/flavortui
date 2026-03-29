@@ -32,7 +32,6 @@ class StatCard(Static):
 
 
 class Kitchen(Vertical):
-
     DEFAULT_CSS = """
     Kitchen {
         layers: sidebar;
@@ -110,7 +109,9 @@ class Kitchen(Vertical):
 
         footer = self.query_one(Footer)
         self.mount(Static(BANNER, id="banner"), before=greeting)
-        greeting.update(f"Welcome back, [bold cyan]{user['display_name']}[/bold cyan]! 🔥")
+        greeting.update(
+            f"Welcome back, [bold cyan]{user['display_name']}[/bold cyan]! 🔥"
+        )
         self.mount(Rule(), after=greeting)
 
         grid = Grid(id="stats-grid")
@@ -122,7 +123,15 @@ class Kitchen(Vertical):
 
         grid2 = Grid(id="stats-grid-2")
         self.mount(grid2, before=footer)
-        grid2.mount(StatCard(f"🕐\n[bold]{format_seconds(user['devlog_seconds_total'])}[/bold]\nTotal Devlog Time"))
-        grid2.mount(StatCard(f"🕐\n[bold]{format_seconds(user['devlog_seconds_today'])}[/bold]\nTime Today"))
+        grid2.mount(
+            StatCard(
+                f"🕐\n[bold]{format_seconds(user['devlog_seconds_total'])}[/bold]\nTotal Devlog Time"
+            )
+        )
+        grid2.mount(
+            StatCard(
+                f"🕐\n[bold]{format_seconds(user['devlog_seconds_today'])}[/bold]\nTime Today"
+            )
+        )
 
         self.mount(Rule(), before=footer)

@@ -10,7 +10,6 @@ from pathlib import Path
 
 
 class Settings(Vertical):
-
     DEFAULT_CSS = """
     Settings {
         layers: sidebar;
@@ -61,12 +60,18 @@ class Settings(Vertical):
 
         with Vertical(classes="section"):
             yield Static("Auth", classes="section-title")
-            yield Static("Reconfigure your flavortown api key. (or remove it!)", classes="setting-description")
+            yield Static(
+                "Reconfigure your flavortown api key. (or remove it!)",
+                classes="setting-description",
+            )
             yield Button("Edit API Key", id="edit-api-key")
 
         with Vertical(classes="section"):
             yield Static("Display", classes="section-title")
-            yield Static("Choose how images are rendered in the terminal. Some terminals will not support specific protocols, and will render weirdly when forced to use them. Auto will automatically find the best rendering option for your terminal. If you are experiencing lag, you might want to try different options and see what's best. Worst case scenario, they can be completely disabled!", classes="setting-description")
+            yield Static(
+                "Choose how images are rendered in the terminal. Some terminals will not support specific protocols, and will render weirdly when forced to use them. Auto will automatically find the best rendering option for your terminal. If you are experiencing lag, you might want to try different options and see what's best. Worst case scenario, they can be completely disabled!",
+                classes="setting-description",
+            )
             with Horizontal(classes="setting-row"):
                 yield Static("Image Rendering mode", classes="setting-label")
                 yield Select(
@@ -76,7 +81,7 @@ class Settings(Vertical):
                         ("Unicode Half-Cell", "halfcell"),
                         ("Sixel", "sixel"),
                         ("Unicode", "unicode"),
-                        ("None!", "none")
+                        ("None!", "none"),
                     ],
                     prompt="Image rendering mode",
                     value=self.app.settings["image_mode"],
@@ -85,7 +90,10 @@ class Settings(Vertical):
 
         with Vertical(classes="section"):
             yield Static("Caching", classes="section-title")
-            yield Static("Control how often data is taken from the cache. The best option is SWR because you get the best of both worlds: fast responses and up-to-date data (on n+1 requests). Timed will almost always show the most recent data, but will respect the API's rate limits. Extended is just timed but with 15x the timeout. If you want to always fetch the latest data, choose Never.", classes="setting-description")
+            yield Static(
+                "Control how often data is taken from the cache. The best option is SWR because you get the best of both worlds: fast responses and up-to-date data (on n+1 requests). Timed will almost always show the most recent data, but will respect the API's rate limits. Extended is just timed but with 15x the timeout. If you want to always fetch the latest data, choose Never.",
+                classes="setting-description",
+            )
             with Horizontal(classes="setting-row"):
                 yield Static("Caching Strategy", classes="setting-label")
                 yield Select(
@@ -93,11 +101,11 @@ class Settings(Vertical):
                         ("Stale While Revalidate (Recommended)", "swr"),
                         ("Timed/Rate Limited", "timed"),
                         ("Extended", "extended"),
-                        ("Never (Not Recommended)", "never")
+                        ("Never (Not Recommended)", "never"),
                     ],
                     prompt="Caching Strategy",
                     value=self.app.settings["caching_strategy"],
-                    id="caching-strategy-select"
+                    id="caching-strategy-select",
                 )
                 yield Button("Clear Cache", id="clear-cache-button", variant="default")
 

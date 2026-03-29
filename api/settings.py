@@ -3,10 +3,7 @@ from pathlib import Path
 from platformdirs import user_config_dir
 
 SETTINGS_PATH = Path(user_config_dir("flavortui")) / "settings.json"
-DEFAULTS = {
-    "image_mode": "auto",
-    "caching_strategy": "swr"
-}
+DEFAULTS = {"image_mode": "auto", "caching_strategy": "swr"}
 
 
 def load_settings() -> dict:

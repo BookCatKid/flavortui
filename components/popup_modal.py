@@ -2,6 +2,7 @@ from textual.screen import ModalScreen
 from textual.containers import Vertical, Horizontal
 from textual.widgets import Button
 
+
 class PopupModal(ModalScreen):
     DEFAULT_CSS = """
     PopupModal {

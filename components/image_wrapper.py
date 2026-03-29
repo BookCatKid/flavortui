@@ -3,7 +3,13 @@ from urllib.parse import urlparse
 
 from textual.containers import Vertical
 from textual.widgets import Static
-from textual_image.widget import Image, HalfcellImage, SixelImage, UnicodeImage, TGPImage
+from textual_image.widget import (
+    Image,
+    HalfcellImage,
+    SixelImage,
+    UnicodeImage,
+    TGPImage,
+)
 
 from api.api_key import get_api_key
 from api.client import get_client
