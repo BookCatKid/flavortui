@@ -4,6 +4,7 @@ import os
 import requests
 import hashlib
 import threading
+import urllib.parse
 
 CACHE_DIR = ".cache"
 
@@ -101,7 +102,8 @@ class ApiClient:
                 return cached_file["status_code"], cached_file["data"]
             # swr caching
             if caching_strategy == "swr":
-                threading.Thread(target=self._revalidate, args=(endpoint,), daemon=True).start()
+                if time.time() - cached_file["timestamp"] >= self._get_endpoint_rate_limit(endpoint):
+                    threading.Thread(target=self._revalidate, args=(endpoint,), daemon=True).start()
                 return cached_file["status_code"], cached_file["data"]
 
         url = f"{self.base_url}/{endpoint}"
@@ -119,15 +121,16 @@ class ApiClient:
         return response.status_code, data
 
     def fetch_image(self, url):
-        if not os.path.exists(self._get_cache_file(url, url.split(".")[-1])):
+        ext = os.path.splitext(urllib.parse.urlparse(url).path)[1].lstrip(".") or "png"
+        if not os.path.exists(self._get_cache_file(url, ext)):
             try:
                 response = requests.get(url)
                 response.raise_for_status()
             except requests.ConnectionError:
                 raise OfflineError("Could not connect to the Flavortown server.")
-            with open(self._get_cache_file(url, url.split(".")[-1]), "wb") as f:
+            with open(self._get_cache_file(url, ext), "wb") as f:
                 f.write(response.content)
-        return self._get_cache_file(url, url.split(".")[-1])
+        return self._get_cache_file(url, ext)
 
 _global_client = None
 

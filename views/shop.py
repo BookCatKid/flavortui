@@ -8,9 +8,9 @@ from components.popup_modal import PopupModal
 
 from api.api import get_store
 from api.api_key import get_api_key
-from api.client import get_client
 
 import webbrowser
+
 
 
 def format_price(price: float) -> str:
@@ -328,12 +328,11 @@ class Shop(Vertical):
         try:
             api_key = get_api_key()
             shop = get_store(api_key)[1]
-            client = get_client(api_key)
 
             cards_data = []
             for item in shop:
                 if item["buyable_by_self"] and item["type"] != "ShopItem::FreeStickers":
-                    image_path = client.fetch_image(item["image_url"])
+                    image_path = item["image_url"]
                     cards_data.append((image_path, item))
 
             self.app.call_from_thread(self._on_store_loaded, cards_data, shop)
@@ -344,6 +343,7 @@ class Shop(Vertical):
         self.app.update_offline_banner()
         self.query_one("#loading", Static).remove()
         footer = self.query_one(Footer)
+
         self.mount(Input(placeholder="Search Items...", id="search-input"), before=footer)
         self.mount(Horizontal(
             Select(options=[("Name", "name"), ("Price", "price"), ("Arbitrary", "arbitrary")], prompt="Sort by", id="sort-select", value="price"),
