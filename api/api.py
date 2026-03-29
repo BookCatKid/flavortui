@@ -13,6 +13,10 @@ def get_user(api_key, user_id="me"):
     status_code, response = fetch_endpoint(f"users/{user_id}", api_key)
     return status_code, response
 
+def get_users(api_key, query="", page=1):
+    return fetch_endpoint(f"users?page={page}&query={query}", api_key)
+
+
 # Store stuff
 
 def get_store(api_key):
@@ -22,7 +26,7 @@ def get_store(api_key):
 def get_store_item(api_key, item_id):
     return fetch_endpoint(f"store/{item_id}", api_key)
 
-# Projects/Devlogs
+# Projects
 
 def get_project(api_key, project_id):
     return fetch_endpoint(f"projects/{project_id}", api_key)
@@ -34,8 +38,16 @@ def get_projects_for_user(api_key, user_id="me"):
         projects.append(get_project(api_key, project_id))
     return projects
 
+def get_projects(api_key, page=1, query=""):
+    return fetch_endpoint(f"projects?page={page}&query={query}", api_key)
+
+# Devlogs
+
 def get_project_devlogs(api_key, project_id):
     return fetch_endpoint(f"projects/{project_id}/devlogs", api_key)
+
+def get_devlogs(api_key, page=1):
+    return fetch_endpoint(f"devlogs?page={page}", api_key)
 
 # Check api key
 
