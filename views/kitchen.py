@@ -1,7 +1,6 @@
 from textual.app import ComposeResult
-from textual.containers import Vertical, Horizontal, Grid
-from textual.widgets import Footer, Static, ProgressBar, Rule
-from textual.worker import Worker, get_current_worker
+from textual.containers import Vertical, Grid
+from textual.widgets import Footer, Static, Rule
 
 from components.sidebar import Sidebar
 from api.api import get_user

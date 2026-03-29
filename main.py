@@ -1,7 +1,6 @@
 from textual.app import App, ComposeResult
-from textual.containers import Horizontal, Vertical
 from textual.reactive import reactive
-from textual.widgets import Input, Button, Static
+from textual.widgets import Static
 
 from components.api_key_input import ApiKeyInput
 from components.sidebar import Sidebar
@@ -11,7 +10,7 @@ from views.shop import Shop
 from views.explore import Explore
 from views.settings import Settings
 
-from api.api_key import get_api_key, save_api_key, delete_api_key
+from api.api_key import get_api_key
 from api.api import check_api_key
 from api.client import OfflineError, get_client
 from api.settings import load_settings, save_settings
