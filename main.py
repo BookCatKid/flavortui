@@ -88,9 +88,6 @@ class FlavortownTUI(App):
         if getattr(self, "_needs_api_key", False):
             self.push_screen(ApiKeyInput(lambda: self.mount(Kitchen())))
 
-    def on_input_submitted(self, event: Input.Submitted):
-        self._save_key()
-
     VIEW_MAP = {
         "kitchen": Kitchen,
         "projects": Projects,
