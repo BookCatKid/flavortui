@@ -1,8 +1,8 @@
 from textual.app import ComposeResult
 from textual.containers import Vertical
-from textual.widget import Widget
-from textual.widgets import Label, Button, Static
 from textual.message import Message
+from textual.widget import Widget
+from textual.widgets import Button, Label, Static
 
 
 class Sidebar(Widget):

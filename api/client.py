@@ -1,12 +1,15 @@
-import time
+import hashlib
 import json
 import os
-import requests
-import hashlib
 import threading
+import time
 import urllib.parse
 
+import requests
+
 CACHE_DIR = ".cache"
+API_TIMEOUT = (3.05, 10)
+IMAGE_TIMEOUT = (3.05, 20)
 
 
 class OfflineError(Exception):
@@ -27,7 +30,8 @@ class ApiClient:
         self._ensure_cache_dir()
 
         self.rate_limits = {
-            # In seconds, how long we should wait between requests. In general we go for double the "required" time.
+            # In seconds, how long we should wait between requests.
+            # In general we go for double the "required" time.
             "projects": 24,
             "store": 24,
             "users_list": 24,
@@ -39,14 +43,14 @@ class ApiClient:
     def _ensure_cache_dir(self):
         os.makedirs(CACHE_DIR, exist_ok=True)
 
-    def _get_cache_file(self, endpoint, format):
+    def _get_cache_file(self, endpoint, file_format):
         hashed_key = hashlib.sha256(endpoint.encode()).hexdigest()
-        return os.path.join(CACHE_DIR, f"{hashed_key}.{format}")
+        return os.path.join(CACHE_DIR, f"{hashed_key}.{file_format}")
 
     def _save_to_cache(self, endpoint, response, status_code):
         self._ensure_cache_dir()
         file_name = self._get_cache_file(endpoint, "json")
-        with open(file_name, "w") as file:
+        with open(file_name, "w", encoding="utf-8") as file:
             json.dump(
                 {
                     "timestamp": time.time(),
@@ -59,7 +63,7 @@ class ApiClient:
     def _load_from_cache(self, endpoint):
         file_name = self._get_cache_file(endpoint, "json")
         if os.path.exists(file_name):
-            with open(file_name, "r") as f:
+            with open(file_name, "r", encoding="utf-8") as f:
                 return json.load(f)
         return None
 
@@ -70,20 +74,17 @@ class ApiClient:
         if base == "users":
             if len(parts) == 1:
                 return self.rate_limits["users_list"]
-            else:
-                return self.rate_limits["default"]
+            return self.rate_limits["default"]
 
         if base == "store":
             if len(parts) == 1:
                 return self.rate_limits["store"]
-            else:
-                return self.rate_limits["store_id"]
+            return self.rate_limits["store_id"]
 
         if base == "projects":
             if len(parts) == 1:
                 return self.rate_limits["projects"]
-            else:
-                return self.rate_limits["projects_id"]
+            return self.rate_limits["projects_id"]
 
         # add other bases here later
 
@@ -91,7 +92,11 @@ class ApiClient:
 
     def _revalidate(self, endpoint):
         try:
-            response = requests.get(f"{self.base_url}/{endpoint}", headers=self.headers)
+            response = requests.get(
+                f"{self.base_url}/{endpoint}",
+                headers=self.headers,
+                timeout=API_TIMEOUT,
+            )
             self._save_to_cache(endpoint, response.json(), response.status_code)
         except Exception:
             pass
@@ -127,7 +132,7 @@ class ApiClient:
         url = f"{self.base_url}/{endpoint}"
 
         try:
-            response = requests.get(url, headers=self.headers)
+            response = requests.get(url, headers=self.headers, timeout=API_TIMEOUT)
         except requests.ConnectionError as e:
             self.is_offline = True
             if cached_file:
@@ -142,7 +147,7 @@ class ApiClient:
         ext = os.path.splitext(urllib.parse.urlparse(url).path)[1].lstrip(".") or "png"
         if not os.path.exists(self._get_cache_file(url, ext)):
             try:
-                response = requests.get(url)
+                response = requests.get(url, timeout=IMAGE_TIMEOUT)
                 response.raise_for_status()
             except requests.ConnectionError:
                 raise OfflineError("Could not connect to the Flavortown server.")
@@ -151,13 +156,13 @@ class ApiClient:
         return self._get_cache_file(url, ext)
 
 
-_global_client = None
+_GLOBAL_CLIENT = None
 
 
 def get_client(api_key, settings=None):
-    global _global_client
-    if not _global_client or _global_client.api_key != api_key:
-        _global_client = ApiClient(api_key, settings)
+    global _GLOBAL_CLIENT
+    if not _GLOBAL_CLIENT or _GLOBAL_CLIENT.api_key != api_key:
+        _GLOBAL_CLIENT = ApiClient(api_key, settings)
     elif settings is not None:
-        _global_client.settings = settings
-    return _global_client
+        _GLOBAL_CLIENT.settings = settings
+    return _GLOBAL_CLIENT

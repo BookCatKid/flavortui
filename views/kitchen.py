@@ -1,12 +1,11 @@
 from textual.app import ComposeResult
-from textual.containers import Vertical, Grid
-from textual.widgets import Footer, Static, Rule
+from textual.containers import Grid, Vertical
+from textual.widgets import Footer, Rule, Static
 
-from components.sidebar import Sidebar
 from api.api import get_user
 from api.api_key import get_api_key
 from api.functions import format_seconds
-
+from components.sidebar import Sidebar
 
 BANNER = """
 ███████╗██╗      █████╗ ██╗   ██╗ ██████╗ ██████╗ ████████╗ ██████╗ ██╗    ██╗███╗   ██╗

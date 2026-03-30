@@ -1,0 +1,11 @@
+[MASTER]
+init-hook='import os, sys; sys.path.insert(0, os.getcwd())'
+ignore=venv,.venv,__pycache__
+
+[MESSAGES CONTROL]
+# so basically I couldn't care less 🤷
+disable=
+    duplicate-code,
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring

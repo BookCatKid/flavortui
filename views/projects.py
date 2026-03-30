@@ -1,16 +1,15 @@
-from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical, Grid
-from textual.widgets import Footer, Markdown, Static, Button
-from components.image_wrapper import SettingsImage
-from components.sidebar import Sidebar
-from components.popup_modal import PopupModal
-
-from api.api import get_projects_for_user, get_project_devlogs
-from api.api_key import get_api_key
-from api.functions import format_seconds, get_days_ago
-
 import webbrowser
 
+from textual.app import ComposeResult
+from textual.containers import Grid, Horizontal, Vertical
+from textual.widgets import Button, Footer, Markdown, Static
+
+from api.api import get_project_devlogs, get_projects_for_user
+from api.api_key import get_api_key
+from api.functions import format_seconds, get_days_ago
+from components.image_wrapper import settings_image
+from components.popup_modal import PopupModal
+from components.sidebar import Sidebar
 
 BASE_URL = "https://flavortown.hackclub.com"
 FALLBACK_PROJECT_IMAGE = (
@@ -80,7 +79,7 @@ class ProjectCard(Vertical):
         self._project = project
 
     def compose(self) -> ComposeResult:
-        img = SettingsImage(self._image_path, self.app)
+        img = settings_image(self._image_path, self.app)
         if img:
             with Horizontal(classes="image-row"):
                 yield img
@@ -95,7 +94,7 @@ class ProjectCard(Vertical):
             )
         )
 
-    def _on_click(self, event):
+    async def _on_click(self, event):
         self.app.push_screen(ProjectItem(self._image_path, self._project))
 
 
@@ -245,7 +244,7 @@ class ProjectItem(PopupModal):
 
         with Vertical(id="project-header"):
             img = (
-                SettingsImage(self._image_path, self.app, id="project-image")
+                settings_image(self._image_path, self.app, id="project-image")
                 if self._image_path
                 else None
             )
@@ -339,7 +338,7 @@ class Projects(Vertical):
             projects = get_projects_for_user(api_key)
 
             cards_data = []
-            for status_code, project in projects:
+            for _, project in projects:
                 banner_url = project.get("banner_url")
                 if banner_url:
                     if banner_url.startswith("/"):

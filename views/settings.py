@@ -1,12 +1,12 @@
+import shutil
+from pathlib import Path
+
 from textual.app import ComposeResult
-from textual.containers import Vertical, Horizontal
-from textual.widgets import Footer, Static, Button, Select
+from textual.containers import Horizontal, Vertical
+from textual.widgets import Button, Footer, Select, Static
 
 from components.api_key_input import ApiKeyInput
 from components.sidebar import Sidebar
-
-import shutil
-from pathlib import Path
 
 
 class Settings(Vertical):
