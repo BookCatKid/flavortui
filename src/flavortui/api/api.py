@@ -1,8 +1,8 @@
 from urllib.parse import urlencode
 
-from api.client import get_client
+from flavortui.api.client import get_client
 
-# This file is suprisingly simple!
+# This file is surprisingly simple!
 
 # simple helper func
 

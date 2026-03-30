@@ -5,15 +5,15 @@ from textual.containers import Grid, Horizontal, Vertical
 from textual.widgets import (Button, Footer, Input, Markdown, Static,
                              TabbedContent, TabPane)
 
-from api.api import (get_devlogs, get_projects, get_projects_for_user,
+from flavortui.api.api import (get_devlogs, get_projects, get_projects_for_user,
                      get_user, get_users)
-from api.api_key import get_api_key
-from api.functions import format_seconds
-from components.image_wrapper import settings_image
-from components.popup_modal import PopupModal
-from components.sidebar import Sidebar
-from views.kitchen import StatCard
-from views.projects import (BASE_URL, FALLBACK_PROJECT_IMAGE, DevlogRow,
+from flavortui.api.api_key import get_api_key
+from flavortui.api.functions import format_seconds
+from flavortui.components.image_wrapper import settings_image
+from flavortui.components.popup_modal import PopupModal
+from flavortui.components.sidebar import Sidebar
+from flavortui.views.kitchen import StatCard
+from flavortui.views.projects import (BASE_URL, FALLBACK_PROJECT_IMAGE, DevlogRow,
                             ProjectCard)
 
 

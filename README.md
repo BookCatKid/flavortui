@@ -1,5 +1,8 @@
 # FlavorTUI
 
+[![PyPI - Version](https://img.shields.io/pypi/v/flavortui.svg)](https://pypi.org/project/flavortui)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/flavortui.svg)](https://pypi.org/project/flavortui)
+
 FlavorTUI is a feature-rich terminal user interface (TUI) for Flavortown. With FlavorTUI, you can browse and create devlogs, manage your projects, explore the shop, and access other Flavortown features, all from an interactive terminal interface.
 
 It is built using the `textual` library, which provides (imo) a great terminal UI experience. The TUI is of course written in Python 🥰. This is my first time creating a TUI so I hope its good :) Depending on your terminal, the ui might look different. It all depends on how well your terminal supports different things.
@@ -13,22 +16,36 @@ Additionaly, your settings are store using the `platformdirs` `user_config_dir` 
   <img src="screenshots/with_sidebar.png" alt="Shop Screenshot" style="width:49%;">
 </div>
 
-## Usage
+## Installation
 
-To run FlavorCLI, ensure that you have python installed. Start by installing the dependencies (I also recommend using a virtual environment):
+```bash
+pip install flavortui
+```
+
+## Local Development
 
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
+pip install -e .
 ```
 
-Then to run it you can use:
+Run with either:
 
 ```bash
-python main.py
+flavortui
+```
+
+or:
+
+```bash
+python -m flavortui
 ```
 
 ## API
 
 Flavortown API docs can be found [here](https://flavortown.hackclub.com/api/v1/docs).
+
+## License
+
+`flavortui` is distributed under the terms of the MIT license.

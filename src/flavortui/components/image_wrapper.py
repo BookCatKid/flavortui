@@ -6,8 +6,8 @@ from textual.widgets import Static
 from textual_image.widget import (HalfcellImage, Image, SixelImage, TGPImage,
                                   UnicodeImage)
 
-from api.api_key import get_api_key
-from api.client import get_client
+from flavortui.api.api_key import get_api_key
+from flavortui.api.client import get_client
 
 IMAGE_WIDGETS = {
     "auto": Image,

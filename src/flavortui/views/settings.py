@@ -5,8 +5,8 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Button, Footer, Select, Static
 
-from components.api_key_input import ApiKeyInput
-from components.sidebar import Sidebar
+from flavortui.components.api_key_input import ApiKeyInput
+from flavortui.components.sidebar import Sidebar
 
 
 class Settings(Vertical):

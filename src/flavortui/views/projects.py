@@ -4,12 +4,12 @@ from textual.app import ComposeResult
 from textual.containers import Grid, Horizontal, Vertical
 from textual.widgets import Button, Footer, Markdown, Static
 
-from api.api import get_project_devlogs, get_projects_for_user
-from api.api_key import get_api_key
-from api.functions import format_seconds, get_days_ago
-from components.image_wrapper import settings_image
-from components.popup_modal import PopupModal
-from components.sidebar import Sidebar
+from flavortui.api.api import get_project_devlogs, get_projects_for_user
+from flavortui.api.api_key import get_api_key
+from flavortui.api.functions import format_seconds, get_days_ago
+from flavortui.components.image_wrapper import settings_image
+from flavortui.components.popup_modal import PopupModal
+from flavortui.components.sidebar import Sidebar
 
 BASE_URL = "https://flavortown.hackclub.com"
 FALLBACK_PROJECT_IMAGE = (

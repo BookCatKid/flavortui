@@ -10,3 +10,7 @@ debug.log
 
 # I hate macos
 .DS_Store
+
+# hatch/pytest
+dist/
+.pytest_cache/
