@@ -38,7 +38,7 @@ class ShopCard(Vertical):
     ShopCard {
         width: 30;
         height: 18;
-        border: tall $accent;
+        border: round $accent;
         text-align: center;
         background: $boost;
         padding: 1;
@@ -116,7 +116,7 @@ class SubItemRow(Vertical):
     SubItemRow {
         width: 100%;
         height: auto;
-        border: tall $accent;
+        border: round $accent;
         background: $boost;
         padding: 0 1;
         align-horizontal: center;
@@ -193,7 +193,7 @@ class ShopItem(PopupModal):
 
     #item-long-description {
         padding: 1;
-        border: tall $accent;
+        border: round $accent;
         background: $boost;
     }
 
@@ -302,7 +302,7 @@ class Shop(Vertical):
         height: auto;
     }
 
-    Shop #loading {
+    Shop .loading {
         text-align: center;
         text-style: bold;
         color: $text;
@@ -346,7 +346,7 @@ class Shop(Vertical):
     def compose(self) -> ComposeResult:
         yield Sidebar()
         yield Static("Shop", id="title")
-        yield Static("Loading...", id="loading")
+        yield Static("Loading...", classes="loading")
         yield Footer()
 
     def on_mount(self):
@@ -371,7 +371,7 @@ class Shop(Vertical):
 
     def _on_store_loaded(self, cards_data, shop_data):
         self.app.update_offline_banner()
-        self.query_one("#loading", Static).remove()
+        self.query_one(".loading", Static).remove()
         footer = self.query_one(Footer)
 
         self.mount(
@@ -429,7 +429,7 @@ class Shop(Vertical):
         self._apply_sort("price")
 
     def _on_load_error(self, error):
-        self.query_one("#loading", Static).update(f"Failed to load: {error}")
+        self.query_one(".loading", Static).update(f"Failed to load: {error}")
 
     def _apply_sort(self, sort_value) -> None:
         cards = [c for c in self._cards if c.display]

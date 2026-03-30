@@ -13,6 +13,7 @@ class PopupModal(ModalScreen):
         width: 80%;
         height: 90%;
         background: $surface;
+        border: round $accent;
         padding: 1 2;
     }
 

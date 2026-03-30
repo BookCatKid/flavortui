@@ -29,7 +29,7 @@ class UserCard(Vertical):
     UserCard {
         width: 1fr;
         height: auto;
-        border: tall $accent;
+        border: round $accent;
         text-align: center;
         background: $boost;
         padding: 1;
@@ -269,6 +269,10 @@ class Explore(Vertical):
         grid-gutter: 1 2;
         margin: 1 4;
         height: auto;
+    }
+
+    Explore Input {
+        margin: 1 4;
     }
 
     Explore #devlogs-grid {

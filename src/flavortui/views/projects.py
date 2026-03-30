@@ -56,8 +56,8 @@ class ProjectCard(Vertical):
     DEFAULT_CSS = """
     ProjectCard {
         width: 1fr;
-        height: 1fr;
-        border: tall $accent;
+        height: auto;
+        border: round $accent;
         text-align: center;
         background: $boost;
         padding: 1;
@@ -108,7 +108,7 @@ class DevlogRow(Vertical):
     DevlogRow {
         width: 100%;
         height: auto;
-        border: tall $accent;
+        border: round $accent;
         background: $boost;
         padding: 0 1 1 1;
         margin: 1 0;
@@ -196,7 +196,7 @@ class ProjectItem(PopupModal):
 
     #item-long-description {
         padding: 1;
-        border: tall $accent;
+        border: round $accent;
         background: $boost;
     }
 
@@ -206,7 +206,7 @@ class ProjectItem(PopupModal):
     }
 
     .devlog-item {
-        border: tall $accent;
+        border: round $accent;
         background: $boost;
         margin: 1 0;
         padding: 1;

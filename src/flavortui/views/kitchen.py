@@ -20,8 +20,8 @@ BANNER = """
 class StatCard(Static):
     DEFAULT_CSS = """
     StatCard {
-        height: 5;
-        border: tall $accent;
+        height: 8;
+        border: round $accent;
         content-align: center middle;
         text-align: center;
         background: $boost;
@@ -52,33 +52,33 @@ class Kitchen(Vertical):
         height: auto;
     }
 
-    Kitchen #loading {
+    Kitchen .loading {
         text-align: center;
         margin: 2 0;
     }
 
     Kitchen Rule {
-        margin: 0 4;
+        margin: 1 4;
     }
 
     Kitchen #stats-grid {
         grid-size: 4;
         grid-gutter: 1 2;
         margin: 1 4;
-        height: auto;
+        height: 10;
     }
 
     Kitchen #stats-grid-2 {
         grid-size: 2;
         grid-gutter: 1 2;
         margin: 1 4;
-        height: auto;
+        height: 10;
     }
     """
 
     def compose(self) -> ComposeResult:
         yield Sidebar()
-        yield Static("Loading...", id="loading")
+        yield Static("Loading...", classes="loading")
         yield Static("", id="greeting")
         yield Footer()
 
@@ -93,12 +93,11 @@ class Kitchen(Vertical):
             self.app.call_from_thread(self._on_load_error, str(e))
 
     def _on_load_error(self, error):
-        self.query_one("#loading", Static).update(f"Failed to load: {error}")
+        self.query_one(".loading", Static).update(f"Failed to load: {error}")
 
     def _render_user(self, user) -> None:
         self.app.update_offline_banner()
-        loading = self.query_one("#loading", Static)
-        loading.remove()
+        self.query_one(".loading", Static).remove()
         greeting = self.query_one("#greeting", Static)
 
         if not user:

@@ -28,7 +28,7 @@ class Settings(Vertical):
 
     Settings .section {
         height: auto;
-        margin: 0 4 1 4;
+        margin: 1 4;
         padding: 1 2;
         background: $boost;
     }
@@ -98,7 +98,7 @@ class Settings(Vertical):
         with Vertical(classes="section"):
             yield Static("Caching", classes="section-title")
             yield Static(
-                "Control how often data is taken from the cache. The best option is SWR because you get the best of both worlds: fast responses and up-to-date data (on n+1 requests). Timed will almost always show the most recent data, but will respect the API's rate limits. Extended is just timed but with 15x the timeout. If you want to always fetch the latest data, choose Never.",
+                "Control how often data is taken from the cache. Stale While Revalidate (SWR) is recommended because you get the best of both worlds: fast responses and up-to-date data. Timed will almost always show the most recent data, but will respect the API's rate limits. Extended is just timed but with 15x the timeout. If you want to always fetch the latest data, choose Never.",
                 classes="setting-description",
             )
             with Horizontal(classes="setting-row"):

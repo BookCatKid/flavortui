@@ -1,21 +1,21 @@
 # TODO
 
-- performance kinda sucks (bruh)
-- offline mode
-- working keyboard support (oops)
+## Done
 
-- video showing off the app
-- polish for ship
+- [x] projects page
+- [x] explore page
+- [x] settings page
+- [x] shop page
+- [x] package for PyPI with Hatch (src layout + entry points)
+- [x] move cache/config to platformdirs directories
+- [x] add storage directory controls in Settings
 
-- refresh button?
+## In Progress / Next
 
-duh:
-
-- projects page
-- explore page
-- settings page
-- shop page
-
-
-- name of project creator + picture?
-- demo, readme, repo urls
+- [ ] performance improvements
+- [ ] working keyboard support (more key bindings and navigation)
+- [ ] refresh button
+- [not possible I think, blame the api 🤷] project creator name + avatar in project detail
+- [x] show demo/readme/repo URLs in project detail
+- [x] release polish pass (copy, layout consistency, spacing)
+- [ ] short video showing off the app
