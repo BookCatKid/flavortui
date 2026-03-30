@@ -4,10 +4,12 @@ import os
 import threading
 import time
 import urllib.parse
+from pathlib import Path
 
 import requests
+from platformdirs import user_cache_dir
 
-CACHE_DIR = ".cache"
+CACHE_DIR = Path(user_cache_dir("flavortui"))
 API_TIMEOUT = (3.05, 10)
 IMAGE_TIMEOUT = (3.05, 20)
 
@@ -41,11 +43,11 @@ class ApiClient:
         }
 
     def _ensure_cache_dir(self):
-        os.makedirs(CACHE_DIR, exist_ok=True)
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
     def _get_cache_file(self, endpoint, file_format):
         hashed_key = hashlib.sha256(endpoint.encode()).hexdigest()
-        return os.path.join(CACHE_DIR, f"{hashed_key}.{file_format}")
+        return CACHE_DIR / f"{hashed_key}.{file_format}"
 
     def _save_to_cache(self, endpoint, response, status_code):
         self._ensure_cache_dir()
