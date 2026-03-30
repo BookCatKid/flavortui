@@ -2,10 +2,10 @@ from textual.app import ComposeResult
 from textual.containers import Grid, Vertical
 from textual.widgets import Footer, Rule, Static
 
-from api.api import get_user
-from api.api_key import get_api_key
-from api.functions import format_seconds
-from components.sidebar import Sidebar
+from flavortui.api.api import get_user
+from flavortui.api.api_key import get_api_key
+from flavortui.api.functions import format_seconds
+from flavortui.components.sidebar import Sidebar
 
 BANNER = """
 ███████╗██╗      █████╗ ██╗   ██╗ ██████╗ ██████╗ ████████╗ ██████╗ ██╗    ██╗███╗   ██╗

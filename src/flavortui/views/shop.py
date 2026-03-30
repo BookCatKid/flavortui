@@ -4,11 +4,11 @@ from textual.app import ComposeResult
 from textual.containers import Grid, Horizontal, Vertical
 from textual.widgets import Button, Footer, Input, Markdown, Select, Static
 
-from api.api import get_store
-from api.api_key import get_api_key
-from components.image_wrapper import settings_image
-from components.popup_modal import PopupModal
-from components.sidebar import Sidebar
+from flavortui.api.api import get_store
+from flavortui.api.api_key import get_api_key
+from flavortui.components.image_wrapper import settings_image
+from flavortui.components.popup_modal import PopupModal
+from flavortui.components.sidebar import Sidebar
 
 
 def format_price(price: float) -> str:

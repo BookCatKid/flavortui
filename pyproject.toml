@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "flavortui"
+dynamic = ["version"]
+description = 'Feature-rich terminal UI for Flavortown: devlogs, projects, shop, and more.'
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "BookCatKid", email = "99609593+BookCatKid@users.noreply.github.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "textual",
+  "textual-image[textual]",
+  "requests",
+  "platformdirs",
+  "keyring",
+]
+
+[project.scripts]
+flavortui = "flavortui.main:main"
+
+[project.urls]
+Documentation = "https://github.com/BookCatKid/flavortui#readme"
+Issues = "https://github.com/BookCatKid/flavortui/issues"
+Source = "https://github.com/BookCatKid/flavortui"
+
+[tool.hatch.version]
+path = "src/flavortui/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/flavortui tests}"
+
+[tool.coverage.run]
+source_pkgs = ["flavortui", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/flavortui/__about__.py",
+]
+
+[tool.coverage.paths]
+flavortui = ["src/flavortui", "*/flavortui/src/flavortui"]
+tests = ["tests", "*/flavortui/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]

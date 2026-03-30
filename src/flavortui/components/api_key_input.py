@@ -1,9 +1,9 @@
 from textual.app import ComposeResult
 from textual.widgets import Button, Input, Static
 
-from api.api import check_api_key
-from api.api_key import delete_api_key, get_api_key, save_api_key
-from components.popup_modal import PopupModal
+from flavortui.api.api import check_api_key
+from flavortui.api.api_key import delete_api_key, get_api_key, save_api_key
+from flavortui.components.popup_modal import PopupModal
 
 
 class ApiKeyInput(PopupModal):

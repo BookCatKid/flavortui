@@ -2,17 +2,17 @@ from textual.app import App, ComposeResult
 from textual.reactive import reactive
 from textual.widgets import Static
 
-from api.api import check_api_key
-from api.api_key import get_api_key
-from api.client import OfflineError, get_client
-from api.settings import load_settings, save_settings
-from components.api_key_input import ApiKeyInput
-from components.sidebar import Sidebar
-from views.explore import Explore
-from views.kitchen import Kitchen
-from views.projects import Projects
-from views.settings import Settings
-from views.shop import Shop
+from flavortui.api.api import check_api_key
+from flavortui.api.api_key import get_api_key
+from flavortui.api.client import OfflineError, get_client
+from flavortui.api.settings import load_settings, save_settings
+from flavortui.components.api_key_input import ApiKeyInput
+from flavortui.components.sidebar import Sidebar
+from flavortui.views.explore import Explore
+from flavortui.views.kitchen import Kitchen
+from flavortui.views.projects import Projects
+from flavortui.views.settings import Settings
+from flavortui.views.shop import Shop
 
 
 class FlavortownTUI(App):
@@ -108,8 +108,15 @@ class FlavortownTUI(App):
         self.show_sidebar = not self.show_sidebar
 
     def watch_show_sidebar(self, show_sidebar: bool) -> None:
-        self.query_one(Sidebar).set_class(show_sidebar, "-visible")
+        try:
+            self.query_one(Sidebar).set_class(show_sidebar, "-visible")
+        except Exception:
+            pass
+
+
+def main() -> None:
+    FlavortownTUI().run()
 
 
 if __name__ == "__main__":
-    FlavortownTUI().run()
+    main()
