@@ -143,6 +143,8 @@ class Settings(Vertical):
 
 
     def on_select_changed(self, event):
+        if not isinstance(event.value, str):
+            return
         if event.select.id == "image-rendering-select":
             self.app.update_setting("image_mode", event.value)
         elif event.select.id == "caching-strategy-select":

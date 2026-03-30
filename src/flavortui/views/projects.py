@@ -26,6 +26,7 @@ def build_project_md(
     description,
     devlog_ids,
     ship_status,
+    ai_declaration,
     max_len=150,
     created_at="",
     updated_at="",
@@ -40,11 +41,14 @@ def build_project_md(
         timing = f"Created {get_days_ago(created_at)} days ago, Updated {get_days_ago(updated_at)} days ago"
     else:
         timing = ""
+
+    ai_declaration_text = f"🤖 {ai_declaration}" if ai_declaration else ""
     return (
         f"## {name}\n\n"
         f"{short_desc}\n\n"
         f"{status}  ·  {devlog_count} {devlog_label}\n\n"
-        f"{timing}"
+        f"{timing}\n\n"
+        f"{ai_declaration_text}"
     )
 
 
@@ -89,6 +93,7 @@ class ProjectCard(Vertical):
                 self._project["description"],
                 self._project["devlog_ids"],
                 self._project["ship_status"],
+                self._project["ai_declaration"],
                 created_at=self._project["created_at"],
                 updated_at=self._project["updated_at"],
             )
@@ -239,6 +244,7 @@ class ProjectItem(PopupModal):
         description = self._project_item["description"]
         devlog_ids = self._project_item["devlog_ids"]
         ship_status = self._project_item["ship_status"]
+        ai_declaration = self._project_item.get("ai_declaration", "")
         created_at = self._project_item["created_at"]
         updated_at = self._project_item["updated_at"]
 
@@ -258,9 +264,10 @@ class ProjectItem(PopupModal):
                 description,
                 devlog_ids,
                 ship_status,
-                float("inf"),
-                created_at,
-                updated_at,
+                ai_declaration,
+                max_len=float("inf"),
+                created_at=created_at,
+                updated_at=updated_at,
             )
         )
         yield Static("Loading...", classes="loading")
