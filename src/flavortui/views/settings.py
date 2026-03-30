@@ -1,10 +1,13 @@
 import shutil
 from pathlib import Path
+import webbrowser
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Button, Footer, Select, Static
 
+from flavortui.api.client import CACHE_DIR
+from flavortui.api.settings import SETTINGS_DIR
 from flavortui.components.api_key_input import ApiKeyInput
 from flavortui.components.sidebar import Sidebar
 
@@ -51,6 +54,10 @@ class Settings(Vertical):
     Settings .setting-label {
         width: 1fr;
         height: auto;
+    }
+
+    Settings #open-config-directory-button {
+        margin-left: 2
     }
     """
 
@@ -109,6 +116,12 @@ class Settings(Vertical):
                 )
                 yield Button("Clear Cache", id="clear-cache-button", variant="default")
 
+        with Vertical(classes="section"):
+            yield Static("Storage Directories", classes="section-title")
+            with Horizontal(classes="setting-row"):
+                yield Button("Open Cache Directory", id="open-cache-directory-button", variant="default")
+                yield Button("Open Config Directory", id="open-config-directory-button", variant="default")
+
         yield Footer()
 
     def on_button_pressed(self, event):
@@ -117,9 +130,17 @@ class Settings(Vertical):
                 self.app.pop_screen()
             self.app.push_screen(ApiKeyInput(lambda: None))
         if event.button.id == "clear-cache-button":
-            p = Path(".cache").resolve()
-            if p.name == ".cache" and p.is_dir():
-                shutil.rmtree(p)
+            if CACHE_DIR.is_dir():
+                shutil.rmtree(CACHE_DIR)
+        elif event.button.id == "open-cache-directory-button":
+            if CACHE_DIR.is_dir():
+                path = Path(CACHE_DIR).resolve()
+                webbrowser.open(path.as_uri())
+        elif event.button.id == "open-config-directory-button":
+            if SETTINGS_DIR.is_dir():
+                path = Path(SETTINGS_DIR).resolve()
+                webbrowser.open(path.as_uri())
+
 
     def on_select_changed(self, event):
         if event.select.id == "image-rendering-select":

@@ -1,6 +1,6 @@
 import keyring
 
-SERVICE = "flavortown-cli"
+SERVICE = "flavortui"
 ACCOUNT = "default"
 
 
