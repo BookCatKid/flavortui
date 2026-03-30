@@ -9,7 +9,27 @@ It is built using the `textual` library, which provides (imo) a great terminal U
 
 Your API key is stored "securely" using the `keyring` library, so you don't have to worry about it being exposed in your terminal history or config files.
 
-Additionaly, your settings are store using the `platformdirs` `user_config_dir` function. Your settings are probobly stored in `~/Library/Application Support/flavortui` on macOS, `C:\Users\<user>\AppData\Local\flavortui` on Windows (`%localappdata%`), and ~/.config/flavortui (or $XDG_CONFIG_HOME) on Linux.
+## Storage Locations
+
+FlavorTUI stores data in three places:
+
+- API key: system keychain/keyring (via `keyring`)
+- Settings JSON: user config directory (via `platformdirs.user_config_dir("flavortui")`)
+- API/image cache: user cache directory (via `platformdirs.user_cache_dir("flavortui")`)
+
+Typical paths:
+
+To easily find where your data is stored, you can simply go to the bottom of the settings menu and click on the associated buttons!
+
+- macOS:
+  - Settings: `~/Library/Application Support/flavortui/settings.json`
+  - Cache: `~/Library/Caches/flavortui/`
+- Windows:
+  - Settings: `%LOCALAPPDATA%\\flavortui\\settings.json`
+  - Cache: `%LOCALAPPDATA%\\flavortui\\Cache\\`
+- Linux:
+  - Settings: `~/.config/flavortui/settings.json` (or `$XDG_CONFIG_HOME/flavortui/settings.json`)
+  - Cache: `~/.cache/flavortui/` (or `$XDG_CACHE_HOME/flavortui/`)
 
 <div>
   <img src="screenshots/kitchen.png" alt="Kitchen Screenshot" style="width:49%;">
