@@ -2,18 +2,17 @@ from textual.app import App, ComposeResult
 from textual.reactive import reactive
 from textual.widgets import Static
 
-from components.api_key_input import ApiKeyInput
-from components.sidebar import Sidebar
-from views.kitchen import Kitchen
-from views.projects import Projects
-from views.shop import Shop
-from views.explore import Explore
-from views.settings import Settings
-
-from api.api_key import get_api_key
 from api.api import check_api_key
+from api.api_key import get_api_key
 from api.client import OfflineError, get_client
 from api.settings import load_settings, save_settings
+from components.api_key_input import ApiKeyInput
+from components.sidebar import Sidebar
+from views.explore import Explore
+from views.kitchen import Kitchen
+from views.projects import Projects
+from views.settings import Settings
+from views.shop import Shop
 
 
 class FlavortownTUI(App):
@@ -57,6 +56,7 @@ class FlavortownTUI(App):
     def __init__(self):
         super().__init__()
         self.settings = load_settings()
+        self._needs_api_key = False
 
     def update_setting(self, key: str, value) -> None:
         self.settings[key] = value
@@ -76,14 +76,11 @@ class FlavortownTUI(App):
             self._needs_api_key = True
 
     def update_offline_banner(self) -> None:
-        try:
-            client = get_client(get_api_key(), self.settings)
-            self.query_one("#offline-banner").set_class(client.is_offline, "-visible")
-        except Exception:
-            pass
+        client = get_client(get_api_key(), self.settings)
+        self.query_one("#offline-banner").set_class(client.is_offline, "-visible")
 
     def on_mount(self) -> None:
-        if getattr(self, "_needs_api_key", False):
+        if self._needs_api_key:
             self.push_screen(ApiKeyInput(lambda: self.mount(Kitchen())))
 
     VIEW_MAP = {
@@ -111,10 +108,7 @@ class FlavortownTUI(App):
         self.show_sidebar = not self.show_sidebar
 
     def watch_show_sidebar(self, show_sidebar: bool) -> None:
-        try:
-            self.query_one(Sidebar).set_class(show_sidebar, "-visible")
-        except Exception:
-            pass
+        self.query_one(Sidebar).set_class(show_sidebar, "-visible")
 
 
 if __name__ == "__main__":

@@ -3,13 +3,8 @@ from urllib.parse import urlparse
 
 from textual.containers import Vertical
 from textual.widgets import Static
-from textual_image.widget import (
-    Image,
-    HalfcellImage,
-    SixelImage,
-    UnicodeImage,
-    TGPImage,
-)
+from textual_image.widget import (HalfcellImage, Image, SixelImage, TGPImage,
+                                  UnicodeImage)
 
 from api.api_key import get_api_key
 from api.client import get_client
@@ -82,9 +77,9 @@ class LazySettingsImage(Vertical):
         placeholder.update("Image unavailable")
 
 
-def SettingsImage(image_path, app, **kwargs):
+def settings_image(image_path, app, **kwargs):
     mode = app.settings.get("image_mode", "auto")
     if mode == "none":
         return None
-    ImageClass = IMAGE_WIDGETS.get(mode, Image)
-    return LazySettingsImage(image_path, app, ImageClass, kwargs)
+    image_class = IMAGE_WIDGETS.get(mode, Image)
+    return LazySettingsImage(image_path, app, image_class, kwargs)

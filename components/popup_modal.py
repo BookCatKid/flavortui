@@ -1,5 +1,5 @@
+from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
-from textual.containers import Vertical, Horizontal
 from textual.widgets import Button
 
 

@@ -1,15 +1,14 @@
-from textual.app import ComposeResult
-from textual.containers import Vertical, Grid, Horizontal
-from textual.widgets import Footer, Markdown, Static, Select, Input, Button
-from components.image_wrapper import SettingsImage
+import webbrowser
 
-from components.sidebar import Sidebar
-from components.popup_modal import PopupModal
+from textual.app import ComposeResult
+from textual.containers import Grid, Horizontal, Vertical
+from textual.widgets import Button, Footer, Input, Markdown, Select, Static
 
 from api.api import get_store
 from api.api_key import get_api_key
-
-import webbrowser
+from components.image_wrapper import settings_image
+from components.popup_modal import PopupModal
+from components.sidebar import Sidebar
 
 
 def format_price(price: float) -> str:
@@ -83,7 +82,7 @@ class ShopCard(Vertical):
         )
 
     def compose(self) -> ComposeResult:
-        img = SettingsImage(self._image_path, self.app, classes="shop-image")
+        img = settings_image(self._image_path, self.app, classes="shop-image")
         if img:
             yield img
         yield Static(self._build_text(), classes="shop-text")
@@ -96,6 +95,15 @@ class ShopCard(Vertical):
         self._real_price = self._price * (1 - (self._sale_percentage or 0) / 100)
         self._sort_price = self._price
         self.query_one(".shop-text", Static).update(self._build_text())
+
+    def get_sort_name(self) -> str:
+        return self._sort_name
+
+    def get_sort_price(self) -> float:
+        return self._sort_price
+
+    def is_enabled_in_region(self, region: str) -> bool:
+        return self._regions.get(f"enabled_{region}", False)
 
     def on_click(self) -> None:
         self.app.push_screen(
@@ -234,7 +242,7 @@ class ShopItem(PopupModal):
 
         with Vertical(id="item-header"):
             img = (
-                SettingsImage(self._image_path, self.app, id="item-image")
+                settings_image(self._image_path, self.app, id="item-image")
                 if self._image_path
                 else None
             )
@@ -329,6 +337,12 @@ class Shop(Vertical):
     }
     """
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._cards = []
+        self._reverse_sort = False
+        self._shop_data = []
+
     def compose(self) -> ComposeResult:
         yield Sidebar()
         yield Static("Shop", id="title")
@@ -420,9 +434,9 @@ class Shop(Vertical):
     def _apply_sort(self, sort_value) -> None:
         cards = [c for c in self._cards if c.display]
         if sort_value == "name":
-            cards.sort(key=lambda c: c._sort_name, reverse=self._reverse_sort)
+            cards.sort(key=lambda c: c.get_sort_name(), reverse=self._reverse_sort)
         elif sort_value == "price":
-            cards.sort(key=lambda c: c._sort_price, reverse=self._reverse_sort)
+            cards.sort(key=lambda c: c.get_sort_price(), reverse=self._reverse_sort)
         elif sort_value == "arbitrary":
             if self._reverse_sort:
                 cards.reverse()
@@ -436,12 +450,6 @@ class Shop(Vertical):
             self._reverse_sort = not self._reverse_sort
             event.button.label = "↓" if self._reverse_sort else "↑"
             self._apply_sort(self.query_one("#sort-select", Select).value)
-        elif event.button.id == "open-web":
-            webbrowser.open(
-                f"https://flavortown.hackclub.com/shop/order?shop_item_id={self._shop_item['id']}"
-            )
-        elif event.button.id == "close":
-            self.app.pop_screen()
 
     def on_select_changed(self, event: Select.Changed) -> None:
         if not self._cards:
@@ -462,10 +470,9 @@ class Shop(Vertical):
 
         for card in self._cards:
             show = True
-            if region_value != "all":
-                if not card._regions.get(f"enabled_{region_value}", False):
-                    show = False
-            if search_query and search_query not in card._sort_name:
+            if region_value != "all" and not card.is_enabled_in_region(region_value):
+                show = False
+            if search_query and search_query not in card.get_sort_name():
                 show = False
             card.display = show
             card.set_region(region_value)

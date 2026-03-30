@@ -1,31 +1,20 @@
+import webbrowser
+
 from textual.app import ComposeResult
-from textual.containers import Vertical, Grid, Horizontal
-from textual.widgets import (
-    Footer,
-    Static,
-    TabbedContent,
-    TabPane,
-    Markdown,
-    Button,
-    Input,
-)
-from components.image_wrapper import SettingsImage
-from components.popup_modal import PopupModal
+from textual.containers import Grid, Horizontal, Vertical
+from textual.widgets import (Button, Footer, Input, Markdown, Static,
+                             TabbedContent, TabPane)
 
-from components.sidebar import Sidebar
-from views.projects import ProjectCard, DevlogRow, BASE_URL, FALLBACK_PROJECT_IMAGE
-from views.kitchen import StatCard
-
-from api.api import (
-    get_devlogs,
-    get_projects,
-    get_users,
-    get_user,
-    get_projects_for_user,
-)
+from api.api import (get_devlogs, get_projects, get_projects_for_user,
+                     get_user, get_users)
 from api.api_key import get_api_key
 from api.functions import format_seconds
-import webbrowser
+from components.image_wrapper import settings_image
+from components.popup_modal import PopupModal
+from components.sidebar import Sidebar
+from views.kitchen import StatCard
+from views.projects import (BASE_URL, FALLBACK_PROJECT_IMAGE, DevlogRow,
+                            ProjectCard)
 
 
 def build_users_md(display_name, cookies, project_ids):
@@ -68,7 +57,7 @@ class UserCard(Vertical):
     def compose(self) -> ComposeResult:
         with Horizontal(classes="image-row"):
             if self._image_path:
-                yield SettingsImage(self._image_path, self.app)
+                yield settings_image(self._image_path, self.app)
         yield Markdown(
             build_users_md(
                 self._user["display_name"],
@@ -77,7 +66,7 @@ class UserCard(Vertical):
             )
         )
 
-    def _on_click(self, event):
+    async def _on_click(self, event):
         self.app.push_screen(UserItem(self._image_path, self._user))
 
 
@@ -157,7 +146,7 @@ class UserItem(PopupModal):
 
     def compose_content(self) -> ComposeResult:
         with Vertical(id="user-header"):
-            img = SettingsImage(self._image_path, self.app, id="user-image")
+            img = settings_image(self._image_path, self.app, id="user-image")
             if img:
                 with Horizontal(id="user-image-row"):
                     yield img
@@ -184,9 +173,7 @@ class UserItem(PopupModal):
             projects = get_projects_for_user(api_key, self._user["id"])
 
             cards_data = []
-            for status_code, project in projects:
-                if status_code != 200:
-                    continue
+            for _, project in projects:
                 banner_url = project.get("banner_url")
                 if banner_url:
                     if banner_url.startswith("/"):
@@ -305,6 +292,17 @@ class Explore(Vertical):
     }
     """
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._all_projects = []
+        self._all_devlogs = []
+        self._all_users = []
+        self._projects_offset = 0
+        self._devlogs_offset = 0
+        self._users_offset = 0
+        self._devlogs_loaded = False
+        self._users_loaded = False
+
     def compose(self) -> ComposeResult:
         yield Sidebar()
         yield Static("Explore", id="title")
@@ -326,12 +324,6 @@ class Explore(Vertical):
         yield Footer()
 
     def on_mount(self):
-        self._all_projects = []
-        self._all_devlogs = []
-        self._all_users = []
-        self._projects_offset = 0
-        self._devlogs_offset = 0
-        self._users_offset = 0
         self.run_worker(self._load_explore, thread=True, exit_on_error=False)
 
     def _load_explore(self):
@@ -356,7 +348,7 @@ class Explore(Vertical):
     def _load_devlogs(self):
         try:
             api_key = get_api_key()
-            status_code, data = get_devlogs(api_key)
+            _, data = get_devlogs(api_key)
             devlogs = data.get("devlogs", [])
             self._all_devlogs = devlogs
             self.app.call_from_thread(self._on_devlogs_loaded)
@@ -366,7 +358,7 @@ class Explore(Vertical):
     def _load_projects(self, query=""):
         try:
             api_key = get_api_key()
-            status_code, data = get_projects(api_key, query=query)
+            _, data = get_projects(api_key, query=query)
             projects = data.get("projects", [])
 
             cards_data = []
@@ -401,7 +393,7 @@ class Explore(Vertical):
     def _load_users(self, query=""):
         try:
             api_key = get_api_key()
-            status_code, data = get_users(api_key, query=query)
+            _, data = get_users(api_key, query=query)
             users = data.get("users", [])
 
             cards_data = []

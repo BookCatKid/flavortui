@@ -1,7 +1,8 @@
-from api.client import get_client
 from urllib.parse import urlencode
 
-# This file is suprisingly simple for now!
+from api.client import get_client
+
+# This file is suprisingly simple!
 
 # simple helper func
 
@@ -71,5 +72,4 @@ def get_devlogs(api_key, page=1):
 
 
 def check_api_key(api_key):
-    status_code, response = get_user(api_key, "me")
-    return status_code == 200
+    return get_user(api_key, "me")[0] == 200
