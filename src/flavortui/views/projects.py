@@ -232,6 +232,15 @@ class ProjectItem(PopupModal):
         text-align: center;
         margin: 2 0;
     }
+
+    #link-buttons {
+        height: auto;
+        align-horizontal: center;
+    }
+
+    #link-buttons Button {
+        margin: 0 2;
+    }
     """
 
     def __init__(self, image_path, project_item, **kwargs):
@@ -270,6 +279,10 @@ class ProjectItem(PopupModal):
                 updated_at=updated_at,
             )
         )
+        with Horizontal(id="link-buttons"):
+            if self._project_item["demo_url"]: yield Button("Demo", id="demo-button", variant="primary")
+            if self._project_item["repo_url"]: yield Button("Repo", id="repo-button", variant="primary")
+            if self._project_item["readme_url"]: yield Button("Readme", id="readme-button", variant="primary")
         yield Static("Loading...", classes="loading")
         yield Vertical(id="devlogs-container")
 
@@ -298,6 +311,12 @@ class ProjectItem(PopupModal):
             webbrowser.open(
                 f"https://flavortown.hackclub.com/projects/{self._project_item['id']}"
             )
+        elif event.button.id == "demo-button":
+            webbrowser.open(self._project_item["demo_url"])
+        elif event.button.id == "repo-button":
+            webbrowser.open(self._project_item["repo_url"])
+        elif event.button.id == "readme-button":
+            webbrowser.open(self._project_item["readme_url"])
         else:
             self.app.pop_screen()
 
