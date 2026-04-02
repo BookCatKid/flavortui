@@ -16,7 +16,10 @@ from flavortui.views.shop import Shop
 
 
 class FlavortownTUI(App):
-    BINDINGS = [("s", "toggle_sidebar", "Toggle Sidebar")]
+    BINDINGS = [
+        ("s", "toggle_sidebar", "Toggle Sidebar"),
+        ("q", "quit", "Quit"),
+    ]
 
     show_sidebar = reactive(False)
 
@@ -109,7 +112,11 @@ class FlavortownTUI(App):
 
     def watch_show_sidebar(self, show_sidebar: bool) -> None:
         try:
-            self.query_one(Sidebar).set_class(show_sidebar, "-visible")
+            sidebar = self.query_one(Sidebar)
+            sidebar.set_class(show_sidebar, "-visible")
+            sidebar.disabled = not show_sidebar
+            if show_sidebar:
+                sidebar.query("Button").first().focus()
         except Exception:
             pass
 

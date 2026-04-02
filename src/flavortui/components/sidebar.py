@@ -47,6 +47,9 @@ class Sidebar(Widget):
     }
     """
 
+    def on_mount(self) -> None:
+        self.disabled = True
+
     def compose(self) -> ComposeResult:
         with Vertical():
             yield Label("Navigation", id="sidebar-title")

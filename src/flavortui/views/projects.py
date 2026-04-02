@@ -1,8 +1,10 @@
 import webbrowser
 
+
 from textual.app import ComposeResult
 from textual.containers import Grid, Horizontal, Vertical
 from textual.widgets import Button, Footer, Markdown, Static
+from flavortui.views.scroll_actions_mixin import ScrollActionsMixin
 
 from flavortui.api.api import get_project_devlogs, get_projects_for_user
 from flavortui.api.api_key import get_api_key
@@ -53,6 +55,9 @@ def build_project_md(
 
 
 class ProjectCard(Vertical):
+    can_focus = True
+    BINDINGS = [("enter", "open_detail", "Open")]
+
     DEFAULT_CSS = """
     ProjectCard {
         width: 1fr;
@@ -61,6 +66,11 @@ class ProjectCard(Vertical):
         text-align: center;
         background: $boost;
         padding: 1;
+    }
+
+    ProjectCard:focus {
+        border: thick $warning;
+        background: $warning 15%;
     }
 
     ProjectCard .image-row {
@@ -98,6 +108,9 @@ class ProjectCard(Vertical):
                 updated_at=self._project["updated_at"],
             )
         )
+
+    def action_open_detail(self):
+        self.app.push_screen(ProjectItem(self._image_path, self._project))
 
     async def _on_click(self, event):
         self.app.push_screen(ProjectItem(self._image_path, self._project))
@@ -280,9 +293,12 @@ class ProjectItem(PopupModal):
             )
         )
         with Horizontal(id="link-buttons"):
-            if self._project_item["demo_url"]: yield Button("Demo", id="demo-button", variant="primary")
-            if self._project_item["repo_url"]: yield Button("Repo", id="repo-button", variant="primary")
-            if self._project_item["readme_url"]: yield Button("Readme", id="readme-button", variant="primary")
+            if self._project_item["demo_url"]:
+                yield Button("Demo", id="demo-button", variant="primary")
+            if self._project_item["repo_url"]:
+                yield Button("Repo", id="repo-button", variant="primary")
+            if self._project_item["readme_url"]:
+                yield Button("Readme", id="readme-button", variant="primary")
         yield Static("Loading...", classes="loading")
         yield Vertical(id="devlogs-container")
 
@@ -321,7 +337,14 @@ class ProjectItem(PopupModal):
             self.app.pop_screen()
 
 
-class Projects(Vertical):
+class Projects(ScrollActionsMixin, Vertical):
+    BINDINGS = [
+        ("j", "scroll_down", "Scroll Down"),
+        ("k", "scroll_up", "Scroll Up"),
+        ("g", "scroll_home", "Top"),
+        ("G", "scroll_end", "Bottom"),
+    ]
+
     DEFAULT_CSS = """
     Projects {
         layers: sidebar;

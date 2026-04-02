@@ -2,9 +2,11 @@ import shutil
 from pathlib import Path
 import webbrowser
 
+
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Button, Footer, Select, Static
+from flavortui.views.scroll_actions_mixin import ScrollActionsMixin
 
 from flavortui.api.client import CACHE_DIR
 from flavortui.api.settings import SETTINGS_DIR
@@ -12,7 +14,14 @@ from flavortui.components.api_key_input import ApiKeyInput
 from flavortui.components.sidebar import Sidebar
 
 
-class Settings(Vertical):
+class Settings(ScrollActionsMixin, Vertical):
+    BINDINGS = [
+        ("j", "scroll_down", "Scroll Down"),
+        ("k", "scroll_up", "Scroll Up"),
+        ("g", "scroll_home", "Top"),
+        ("G", "scroll_end", "Bottom"),
+    ]
+
     DEFAULT_CSS = """
     Settings {
         layers: sidebar;
@@ -119,8 +128,16 @@ class Settings(Vertical):
         with Vertical(classes="section"):
             yield Static("Storage Directories", classes="section-title")
             with Horizontal(classes="setting-row"):
-                yield Button("Open Cache Directory", id="open-cache-directory-button", variant="default")
-                yield Button("Open Config Directory", id="open-config-directory-button", variant="default")
+                yield Button(
+                    "Open Cache Directory",
+                    id="open-cache-directory-button",
+                    variant="default",
+                )
+                yield Button(
+                    "Open Config Directory",
+                    id="open-config-directory-button",
+                    variant="default",
+                )
 
         yield Footer()
 
@@ -140,7 +157,6 @@ class Settings(Vertical):
             if SETTINGS_DIR.is_dir():
                 path = Path(SETTINGS_DIR).resolve()
                 webbrowser.open(path.as_uri())
-
 
     def on_select_changed(self, event):
         if not isinstance(event.value, str):

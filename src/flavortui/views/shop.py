@@ -1,8 +1,10 @@
 import webbrowser
 
+
 from textual.app import ComposeResult
 from textual.containers import Grid, Horizontal, Vertical
 from textual.widgets import Button, Footer, Input, Markdown, Select, Static
+from flavortui.views.scroll_actions_mixin import ScrollActionsMixin
 
 from flavortui.api.api import get_store
 from flavortui.api.api_key import get_api_key
@@ -34,6 +36,9 @@ def build_shop_text(
 
 
 class ShopCard(Vertical):
+    can_focus = True
+    BINDINGS = [("enter", "open_detail", "Open")]
+
     DEFAULT_CSS = """
     ShopCard {
         width: 30;
@@ -42,6 +47,11 @@ class ShopCard(Vertical):
         text-align: center;
         background: $boost;
         padding: 1;
+    }
+
+    ShopCard:focus {
+        border: thick $warning;
+        background: $warning 15%;
     }
 
     ShopCard Image {
@@ -104,6 +114,11 @@ class ShopCard(Vertical):
 
     def is_enabled_in_region(self, region: str) -> bool:
         return self._regions.get(f"enabled_{region}", False)
+
+    def action_open_detail(self):
+        self.app.push_screen(
+            ShopItem(self._image_path, self._shop_item, self._shop_data)
+        )
 
     def on_click(self) -> None:
         self.app.push_screen(
@@ -287,7 +302,14 @@ class ShopItem(PopupModal):
             self.app.pop_screen()
 
 
-class Shop(Vertical):
+class Shop(ScrollActionsMixin, Vertical):
+    BINDINGS = [
+        ("j", "scroll_down", "Scroll Down"),
+        ("k", "scroll_up", "Scroll Up"),
+        ("g", "scroll_home", "Top"),
+        ("G", "scroll_end", "Bottom"),
+    ]
+
     DEFAULT_CSS = """
     Shop {
         layers: sidebar;

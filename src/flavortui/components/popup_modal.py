@@ -1,9 +1,19 @@
 from textual.containers import Horizontal, Vertical
+
 from textual.screen import ModalScreen
+from flavortui.views.scroll_actions_mixin import ScrollActionsMixin
 from textual.widgets import Button
 
 
-class PopupModal(ModalScreen):
+class PopupModal(ScrollActionsMixin, ModalScreen):
+    BINDINGS = [
+        ("escape", "close_modal", "Close"),
+        ("j", "scroll_down", "Scroll Down"),
+        ("k", "scroll_up", "Scroll Up"),
+        ("g", "scroll_home", "Top"),
+        ("G", "scroll_end", "Bottom"),
+    ]
+
     DEFAULT_CSS = """
     PopupModal {
         align: center middle;
@@ -51,3 +61,15 @@ class PopupModal(ModalScreen):
 
     def compose_footer(self):
         return [Button("Close", variant="primary")]
+
+    def action_close_modal(self):
+        self.app.pop_screen()
+
+    def scroll_relative(self, y=0):
+        self.query_one("#dialog-content").scroll_relative(y=y)
+
+    def scroll_home(self, animate=False):
+        self.query_one("#dialog-content").scroll_home(animate=animate)
+
+    def scroll_end(self, animate=False):
+        self.query_one("#dialog-content").scroll_end(animate=animate)

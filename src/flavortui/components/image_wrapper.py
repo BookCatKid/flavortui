@@ -3,8 +3,13 @@ from urllib.parse import urlparse
 
 from textual.containers import Vertical
 from textual.widgets import Static
-from textual_image.widget import (HalfcellImage, Image, SixelImage, TGPImage,
-                                  UnicodeImage)
+from textual_image.widget import (
+    HalfcellImage,
+    Image,
+    SixelImage,
+    TGPImage,
+    UnicodeImage,
+)
 
 from flavortui.api.api_key import get_api_key
 from flavortui.api.client import get_client

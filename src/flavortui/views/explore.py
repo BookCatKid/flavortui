@@ -2,19 +2,37 @@ import webbrowser
 
 from textual.app import ComposeResult
 from textual.containers import Grid, Horizontal, Vertical
-from textual.widgets import (Button, Footer, Input, Markdown, Static,
-                             TabbedContent, TabPane)
+from textual.widgets import (
+    Button,
+    Footer,
+    Input,
+    Markdown,
+    Static,
+    TabbedContent,
+    TabPane,
+)
 
-from flavortui.api.api import (get_devlogs, get_projects, get_projects_for_user,
-                     get_user, get_users)
+from flavortui.views.scroll_actions_mixin import ScrollActionsMixin
+
+from flavortui.api.api import (
+    get_devlogs,
+    get_projects,
+    get_projects_for_user,
+    get_user,
+    get_users,
+)
 from flavortui.api.api_key import get_api_key
 from flavortui.api.functions import format_seconds
 from flavortui.components.image_wrapper import settings_image
 from flavortui.components.popup_modal import PopupModal
 from flavortui.components.sidebar import Sidebar
 from flavortui.views.kitchen import StatCard
-from flavortui.views.projects import (BASE_URL, FALLBACK_PROJECT_IMAGE, DevlogRow,
-                            ProjectCard)
+from flavortui.views.projects import (
+    BASE_URL,
+    FALLBACK_PROJECT_IMAGE,
+    DevlogRow,
+    ProjectCard,
+)
 
 
 def build_users_md(display_name, cookies, project_ids):
@@ -25,6 +43,9 @@ def build_users_md(display_name, cookies, project_ids):
 
 
 class UserCard(Vertical):
+    can_focus = True
+    BINDINGS = [("enter", "open_detail", "Open")]
+
     DEFAULT_CSS = """
     UserCard {
         width: 1fr;
@@ -33,6 +54,11 @@ class UserCard(Vertical):
         text-align: center;
         background: $boost;
         padding: 1;
+    }
+
+    UserCard:focus {
+        border: thick $warning;
+        background: $warning 15%;
     }
 
     UserCard .image-row {
@@ -65,6 +91,9 @@ class UserCard(Vertical):
                 self._user["project_ids"],
             )
         )
+
+    def action_open_detail(self):
+        self.app.push_screen(UserItem(self._image_path, self._user))
 
     async def _on_click(self, event):
         self.app.push_screen(UserItem(self._image_path, self._user))
@@ -231,7 +260,14 @@ class UserItem(PopupModal):
 CHUNK_SIZE = 20
 
 
-class Explore(Vertical):
+class Explore(ScrollActionsMixin, Vertical):
+    BINDINGS = [
+        ("j", "scroll_down", "Scroll Down"),
+        ("k", "scroll_up", "Scroll Up"),
+        ("g", "scroll_home", "Top"),
+        ("G", "scroll_end", "Bottom"),
+    ]
+
     DEFAULT_CSS = """
     Explore {
         layers: sidebar;
@@ -490,3 +526,15 @@ class Explore(Vertical):
             self, "_users_loaded", False
         ):
             self.run_worker(self._load_users, thread=True, exit_on_error=False)
+
+    def scroll_relative(self, y=0):
+        active = self.query_one(TabbedContent).active_pane
+        active.scroll_relative(y=y)
+
+    def scroll_home(self, animate=False):
+        active = self.query_one(TabbedContent).active_pane
+        active.scroll_home(animate=animate)
+
+    def scroll_end(self, animate=False):
+        active = self.query_one(TabbedContent).active_pane
+        active.scroll_end(animate=animate)
