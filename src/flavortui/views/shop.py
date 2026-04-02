@@ -439,6 +439,7 @@ class Shop(ScrollActionsMixin, Vertical):
 
         self._shop_data = shop_data
 
+        cards_data.sort(key=lambda x: x[1]["ticket_cost"]["base_cost"])
         for image_path, item in cards_data:
             card = ShopCard(
                 image_path,
@@ -448,7 +449,6 @@ class Shop(ScrollActionsMixin, Vertical):
             self._cards.append(card)
 
         grid.mount_all(self._cards)
-        self._apply_sort("price")
 
     def _on_load_error(self, error):
         self.query_one(".loading", Static).update(f"Failed to load: {error}")
