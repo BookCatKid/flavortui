@@ -7,6 +7,7 @@
 
 If you want a demo video dispalying *almost* all of the features, you can watch this:
 
+![Demo Video](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/demo.mov)
 
 FlavorTUI is a terminal user interface (TUI) for Flavortown. With FlavorTUI, you can view your stats, browse your projects and devlogs, explore the shop, and discover other users' projects, all from an interactive terminal interface.
 
@@ -37,8 +38,11 @@ To easily find where your data is stored, you can simply go to the bottom of the
   - Cache: `~/.cache/flavortui/` (or `$XDG_CACHE_HOME/flavortui/`)
 
 ![Kitchen Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/kitchen.png)
-![Sidebar Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/with_sidebar.png)
-![Shop Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/shop.png)
+![Projects Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/projects.png)
+![Kitchen Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/kitchen.png)
+![Explore Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/explore.png)
+![Settings Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/settings.png)
+![With-Sidebar Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/with-sidebar.png)
 
 ## Installation
 
