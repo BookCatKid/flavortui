@@ -3,11 +3,27 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/flavortui.svg)](https://pypi.org/project/flavortui)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/flavortui.svg)](https://pypi.org/project/flavortui)
 
+- [FlavorTUI](#flavortui)
+  - [Demo](#demo)
+  - [Description](#description)
+  - [Storage Locations](#storage-locations)
+  - [Screenshots](#screenshots)
+  - [Installation](#installation)
+  - [Local Development](#local-development)
+  - [API](#api)
+  - [License](#license)
+
+
 ## Demo
 
-If you want a demo video dispalying *almost* all of the features, you can watch this:
+If you want a demo video dispalying _almost_ all of the features, you can watch this:
 
-![Demo Video](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/demo.mov)
+<video width="400" controls>
+  <source src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/demo.mov" type="video/mov">
+  [Click here to watch it](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/demo.mov)
+</video>
+
+## Description
 
 FlavorTUI is a terminal user interface (TUI) for Flavortown. With FlavorTUI, you can view your stats, browse your projects and devlogs, explore the shop, and discover other users' projects, all from an interactive terminal interface.
 
@@ -37,12 +53,24 @@ To easily find where your data is stored, you can simply go to the bottom of the
   - Settings: `~/.config/flavortui/settings.json` (or `$XDG_CONFIG_HOME/flavortui/settings.json`)
   - Cache: `~/.cache/flavortui/` (or `$XDG_CACHE_HOME/flavortui/`)
 
-![Kitchen Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/kitchen.png)
-![Projects Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/projects.png)
-![Kitchen Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/kitchen.png)
-![Explore Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/explore.png)
-![Settings Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/settings.png)
-![With-Sidebar Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/with-sidebar.png)
+## Screenshots
+
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/kitchen.png" width="100%"></td>
+      <td><img src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/projects.png" width="100%"></td>
+    </tr>
+    <tr>
+      <td><img src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/kitchen.png" width="100%"></td>
+      <td><img src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/explore.png" width="100%"></td>
+    </tr>
+    <tr>
+      <td><img src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/settings.png" width="100%"></td>
+      <td><img src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/with-sidebar.png" width="100%"></td>
+    </tr>
+  </table>
+</div>
 
 ## Installation
 
