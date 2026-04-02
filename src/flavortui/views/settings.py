@@ -139,6 +139,16 @@ class Settings(ScrollActionsMixin, Vertical):
                     variant="default",
                 )
 
+        with Vertical(classes="section"):
+            yield Static("Banner Mode", classes="section-title")
+            with Horizontal(classes="setting-row"):
+                yield Static("You're welcome.", classes="setting-label")
+                yield Select(
+                    [("Flavortown", "normal"), ("Flavourtown", "weird")],
+                    value=self.app.settings["banner_mode"],
+                    id="banner-mode-select",
+                )
+
         yield Footer()
 
     def on_button_pressed(self, event):
@@ -165,3 +175,5 @@ class Settings(ScrollActionsMixin, Vertical):
             self.app.update_setting("image_mode", event.value)
         elif event.select.id == "caching-strategy-select":
             self.app.update_setting("caching_strategy", event.value)
+        elif event.select.id == "banner-mode-select":
+            self.app.update_setting("banner_mode", event.value)

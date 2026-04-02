@@ -16,6 +16,15 @@ BANNER = """
 ╚═╝     ╚══════╝╚═╝  ╚═╝  ╚═══╝   ╚═════╝ ╚═╝  ╚═╝   ╚═╝    ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝
 """
 
+BANNER_WEIRD = """
+███████╗██╗      █████╗ ██╗   ██╗ ██████╗ ██╗   ██╗██████╗ ████████╗ ██████╗ ██╗    ██╗███╗   ██╗
+██╔════╝██║     ██╔══██╗██║   ██║██╔═══██╗██║   ██║██╔══██╗╚══██╔══╝██╔═══██╗██║    ██║████╗  ██║
+█████╗  ██║     ███████║██║   ██║██║   ██║██║   ██║██████╔╝   ██║   ██║   ██║██║ █╗ ██║██╔██╗ ██║
+██╔══╝  ██║     ██╔══██║╚██╗ ██╔╝██║   ██║██║   ██║██╔══██╗   ██║   ██║   ██║██║███╗██║██║╚██╗██║
+██║     ███████╗██║  ██║ ╚████╔╝ ╚██████╔╝╚██████╔╝██║  ██║   ██║   ╚██████╔╝╚███╔███╔╝██║ ╚████║
+╚═╝     ╚══════╝╚═╝  ╚═╝  ╚═══╝   ╚═════╝  ╚═════╝ ╚═╝  ╚═╝   ╚═╝    ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝
+"""
+
 
 class StatCard(Static):
     DEFAULT_CSS = """
@@ -105,7 +114,10 @@ class Kitchen(Vertical):
             return
 
         footer = self.query_one(Footer)
-        self.mount(Static(BANNER, id="banner"), before=greeting)
+        if self.app.settings["banner_mode"] == "weird":
+            self.mount(Static(BANNER_WEIRD, id="banner"), before=greeting)
+        else:
+            self.mount(Static(BANNER, id="banner"), before=greeting)
         greeting.update(
             f"Welcome back, [bold cyan]{user['display_name']}[/bold cyan]! 🔥"
         )
