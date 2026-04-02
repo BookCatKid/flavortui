@@ -6,6 +6,7 @@
 - [FlavorTUI](#flavortui)
   - [Demo](#demo)
   - [Description](#description)
+  - [Performance (PLEASE READ)](#performance-please-read)
   - [Storage Locations](#storage-locations)
   - [Screenshots](#screenshots)
   - [Installation](#installation)
@@ -27,6 +28,24 @@ FlavorTUI is a terminal user interface (TUI) for Flavortown. With FlavorTUI, you
 It is built using the `textual` library, which provides (imo) a great terminal UI experience. The TUI is of course written in Python 🥰. This is my first time creating a TUI so I hope its good :) Depending on your terminal, the ui might look different. It all depends on how well your terminal supports different things.
 
 Your API key is stored "securely" using the `keyring` library, so you don't have to worry about it being exposed in your terminal history or config files.
+
+## Performance (PLEASE READ)
+
+**Image lag**:
+Depending on your terminal, performance might be *very* bad. I suggest switching image rendering modes until you find one that works. Worst case you can disable images entirely.
+
+**Buggy UI**: If your UI looks buggy (text is in the wrong spot, images are jittery), please try changing your image rendering mode. Bad terminals (such as the **Windows Terminal**) will most likely **break stuff really badly**
+
+I **highly recommend** using a terminal that supports all of these modern rendering things. From the very minimal selection that I have tested, I suggest:
+
+- Kitty (the best!)
+- WezTerm
+- iTerm
+- Alacritty
+
+Kitty (in my opinion) is the best. It has great performance and support for everything. The others, you might want to change the image rendering settings.
+
+Please avoid reporting UI issues if you're using a terminal with limited or inconsistent graphics support, as these issues are often caused by the terminal itself rather than the app.
 
 ## Storage Locations
 
