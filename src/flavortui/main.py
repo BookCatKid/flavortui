@@ -93,14 +93,13 @@ class FlavortownTUI(App):
         "explore": Explore,
         "settings": Settings,
     }
+    _VIEW_SELECTOR = ", ".join(v.__name__ for v in VIEW_MAP.values())
 
     def _switch_view(self, view_name: str) -> None:
         view_cls = self.VIEW_MAP.get(view_name)
         if not view_cls:
             return
-        selector = ", ".join(v.__name__ for v in self.VIEW_MAP.values())
-        current = self.query(selector)
-        current.remove()
+        self.query(self._VIEW_SELECTOR).remove()
         self.mount(view_cls())
         self.show_sidebar = False
 

@@ -497,6 +497,7 @@ class Shop(ScrollActionsMixin, Vertical):
             if search_query and search_query not in card.get_sort_name():
                 show = False
             card.display = show
-            card.set_region(region_value)
+            if show:
+                card.set_region(region_value)
 
         self._apply_sort(sort_value)

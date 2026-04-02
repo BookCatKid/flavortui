@@ -113,22 +113,26 @@ class Kitchen(Vertical):
 
         grid = Grid(id="stats-grid")
         self.mount(grid, before=footer)
-        grid.mount(StatCard(f"🍪\n\n[bold]{user['cookies']}[/bold] Cookies"))
-        grid.mount(StatCard(f"👍\n\n[bold]{user['vote_count']}[/bold] Votes"))
-        grid.mount(StatCard(f"💜\n\n[bold]{user['like_count']}[/bold] Likes"))
-        grid.mount(StatCard(f"📁\n\n[bold]{len(user['project_ids'])}[/bold] Projects"))
+        grid.mount_all(
+            [
+                StatCard(f"🍪\n\n[bold]{user['cookies']}[/bold] Cookies"),
+                StatCard(f"👍\n\n[bold]{user['vote_count']}[/bold] Votes"),
+                StatCard(f"💜\n\n[bold]{user['like_count']}[/bold] Likes"),
+                StatCard(f"📁\n\n[bold]{len(user['project_ids'])}[/bold] Projects"),
+            ]
+        )
 
         grid2 = Grid(id="stats-grid-2")
         self.mount(grid2, before=footer)
-        grid2.mount(
-            StatCard(
-                f"🕐\n[bold]{format_seconds(user['devlog_seconds_total'])}[/bold]\nTotal Devlog Time"
-            )
-        )
-        grid2.mount(
-            StatCard(
-                f"🕐\n[bold]{format_seconds(user['devlog_seconds_today'])}[/bold]\nTime Today"
-            )
+        grid2.mount_all(
+            [
+                StatCard(
+                    f"🕐\n[bold]{format_seconds(user['devlog_seconds_total'])}[/bold]\nTotal Devlog Time"
+                ),
+                StatCard(
+                    f"🕐\n[bold]{format_seconds(user['devlog_seconds_today'])}[/bold]\nTime Today"
+                ),
+            ]
         )
 
         self.mount(Rule(), before=footer)

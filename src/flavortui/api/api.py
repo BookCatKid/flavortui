@@ -2,6 +2,8 @@ from urllib.parse import urlencode
 
 from flavortui.api.client import get_client
 
+from concurrent.futures import ThreadPoolExecutor
+
 # This file is surprisingly simple!
 
 # simple helper func
@@ -45,9 +47,9 @@ def get_project(api_key, project_id):
 
 def get_projects_for_user(api_key, user_id="me"):
     user = get_user(api_key, user_id)
-    projects = []
-    for project_id in user[1]["project_ids"]:
-        projects.append(get_project(api_key, project_id))
+    project_ids = user[1]["project_ids"]
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        projects = list(pool.map(lambda pid: get_project(api_key, pid), project_ids))
     return projects
 
 

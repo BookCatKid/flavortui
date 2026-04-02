@@ -12,10 +12,10 @@
 
 ## In Progress / Next
 
-- [ ] performance improvements
+- [x] performance improvements
 - [x] working keyboard support (more key bindings and navigation)
 - [ ] refresh button
 - [not possible I think, blame the api 🤷] project creator name + avatar in project detail
 - [x] show demo/readme/repo URLs in project detail
 - [x] release polish pass (copy, layout consistency, spacing)
-- [ ] short video showing off the app
+- [x] short video showing off the app
