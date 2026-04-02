@@ -18,10 +18,7 @@
 
 If you want a demo video dispalying _almost_ all of the features, you can watch this:
 
-<video width="400" controls>
-  <source src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/demo.mov" type="video/mov">
-  [Click here to watch it](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/demo.mov)
-</video>
+https://github.com/user-attachments/assets/22f0fe11-7338-4f3a-81ef-6a218db126e5
 
 ## Description
 
