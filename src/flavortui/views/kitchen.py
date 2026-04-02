@@ -6,6 +6,7 @@ from flavortui.api.api import get_user
 from flavortui.api.api_key import get_api_key
 from flavortui.api.functions import format_seconds
 from flavortui.components.sidebar import Sidebar
+from flavortui.views.scroll_actions_mixin import ScrollActionsMixin
 
 BANNER = """
 ███████╗██╗      █████╗ ██╗   ██╗ ██████╗ ██████╗ ████████╗ ██████╗ ██╗    ██╗███╗   ██╗
@@ -38,7 +39,16 @@ class StatCard(Static):
     """
 
 
-class Kitchen(Vertical):
+class Kitchen(ScrollActionsMixin, Vertical):
+    can_focus = True
+
+    BINDINGS = [
+        ("j", "scroll_down", "Scroll Down"),
+        ("k", "scroll_up", "Scroll Up"),
+        ("g", "scroll_home", "Top"),
+        ("G", "scroll_end", "Bottom"),
+    ]
+
     DEFAULT_CSS = """
     Kitchen {
         layers: sidebar;
@@ -53,7 +63,7 @@ class Kitchen(Vertical):
         height: auto;
     }
 
-    Kitchen #greeting {
+    Kitchen #greeting, #achievement-title {
         text-align: center;
         text-style: bold italic;
         color: $text;
@@ -82,6 +92,13 @@ class Kitchen(Vertical):
         grid-gutter: 1 2;
         margin: 1 4;
         height: 10;
+    }
+
+    Kitchen #stats-grid-3 {
+        grid-size: 2;
+        grid-gutter: 1 2;
+        margin: 1 4;
+        height: auto;
     }
     """
 
@@ -114,13 +131,16 @@ class Kitchen(Vertical):
             return
 
         footer = self.query_one(Footer)
+
         if self.app.settings["banner_mode"] == "weird":
             self.mount(Static(BANNER_WEIRD, id="banner"), before=greeting)
         else:
             self.mount(Static(BANNER, id="banner"), before=greeting)
+
         greeting.update(
             f"Welcome back, [bold cyan]{user['display_name']}[/bold cyan]! 🔥"
         )
+
         self.mount(Rule(), after=greeting)
 
         grid = Grid(id="stats-grid")
@@ -145,6 +165,19 @@ class Kitchen(Vertical):
                     f"🕐\n[bold]{format_seconds(user['devlog_seconds_today'])}[/bold]\nTime Today"
                 ),
             ]
+        )
+
+        self.mount(Rule(), after=grid2)
+
+        self.mount(Static("Achievements 🏆", id="achievement-title"), before=footer)
+
+        grid3 = Grid(id="stats-grid-3")
+        self.mount(grid3, before=footer)
+        grid3.mount_all(
+            StatCard(
+                f"[bold]{achievement['name']}[/bold]\n\n{achievement['description']}"
+            )
+            for achievement in user["achievements"]
         )
 
         self.mount(Rule(), before=footer)

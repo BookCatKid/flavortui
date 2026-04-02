@@ -149,6 +149,21 @@ class UserItem(PopupModal):
         height: auto;
     }
 
+    #user-stats-grid-3 {
+        grid-size: 2;
+        grid-gutter: 1 2;
+        margin: 1 0 0 0;
+        height: auto;
+    }
+
+    #achievement-title {
+        text-align: center;
+        text-style: bold italic;
+        color: $text;
+        margin: 0 0 1 0;
+        height: auto;
+    }
+
     #user-projects-title {
         text-align: center;
         text-style: bold;
@@ -184,6 +199,7 @@ class UserItem(PopupModal):
         yield Static("Loading...", classes="loading")
         yield Grid(id="user-stats-grid")
         yield Grid(id="user-stats-grid-2")
+        yield Grid(id="user-stats-grid-3")
         yield Static("Projects", id="user-projects-title")
         yield Grid(id="user-projects-grid")
 
@@ -239,6 +255,18 @@ class UserItem(PopupModal):
                 f"🕐\n[bold]{format_seconds(user.get('devlog_seconds_today', 0))}[/bold]\nTime Today"
             )
         )
+
+        stats3 = self.query_one("#user-stats-grid-3", Grid)
+        if user["achievements"]:
+            stats3_items = []
+            stats3_items.extend(
+                StatCard(
+                    f"[bold]{achievement['name']}[/bold]\n\n{achievement['description']}"
+                )
+                for achievement in user["achievements"]
+            )
+            self.mount(Static("Achievements 🏆", id="achievement-title"), before=stats3)
+            stats3.mount_all(stats3_items)
 
         projects_grid = self.query_one("#user-projects-grid", Grid)
         if cards_data:

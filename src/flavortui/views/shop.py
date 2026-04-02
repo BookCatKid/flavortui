@@ -254,6 +254,14 @@ class ShopItem(PopupModal):
         stock = self._shop_item["stock"]
         price_line = build_price_line(price, sale)
         stock_display = f"  ·  Stock: {stock}" if stock is not None else ""
+        requires_achievement = self._shop_item.get("requires_achievement")
+        requires_achievement_text = (
+            requires_achievement
+            and len(requires_achievement) > 0
+            and requires_achievement[0]
+            and f'\n\nUnlocked via "{requires_achievement[0].replace("_", " ").title()}" achievement'
+            or ""
+        )
 
         with Vertical(id="item-header"):
             img = (
@@ -265,7 +273,9 @@ class ShopItem(PopupModal):
                 with Horizontal(id="item-image-row"):
                     yield img
             yield Static(f"[bold]{self._shop_item['name']}[/bold]", id="item-title")
-        yield Static(f"{price_line}{stock_display}", id="item-info")
+        yield Static(
+            f"{price_line}{stock_display}{requires_achievement_text}", id="item-info"
+        )
         if self._shop_item.get("description"):
             yield Static(self._shop_item["description"], id="item-description")
         if self._shop_item.get("long_description"):
