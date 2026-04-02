@@ -81,9 +81,10 @@ class UserCard(Vertical):
         self._user = user
 
     def compose(self) -> ComposeResult:
-        with Horizontal(classes="image-row"):
-            if self._image_path:
-                yield settings_image(self._image_path, self.app)
+        img = settings_image(self._image_path, self.app) if self._image_path else None
+        if img:
+            with Horizontal(classes="image-row"):
+                yield img
         yield Markdown(
             build_users_md(
                 self._user["display_name"],

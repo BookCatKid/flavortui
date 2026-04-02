@@ -75,6 +75,12 @@ To easily find where your data is stored, you can simply go to the bottom of the
 pip install flavortui
 ```
 
+or, to install the latest from GitHub:
+
+```bash
+pip install git+https://github.com/bookcatkid/flavortui
+```
+
 ## Local Development
 
 ```bash
