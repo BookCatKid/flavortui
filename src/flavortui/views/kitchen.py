@@ -30,7 +30,7 @@ class StatCard(Static):
     DEFAULT_CSS = """
     StatCard {
         height: 8;
-        border: round $accent;
+        border: tall $accent;
         content-align: center middle;
         text-align: center;
         background: $boost;

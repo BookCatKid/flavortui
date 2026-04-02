@@ -43,7 +43,7 @@ class ShopCard(Vertical):
     ShopCard {
         width: 30;
         height: 18;
-        border: round $accent;
+        border: tall $accent;
         text-align: center;
         background: $boost;
         padding: 1;
@@ -131,7 +131,7 @@ class SubItemRow(Vertical):
     SubItemRow {
         width: 100%;
         height: auto;
-        border: round $accent;
+        border: tall $accent;
         background: $boost;
         padding: 0 1;
         align-horizontal: center;
@@ -208,7 +208,7 @@ class ShopItem(PopupModal):
 
     #item-long-description {
         padding: 1;
-        border: round $accent;
+        border: tall $accent;
         background: $boost;
     }
 

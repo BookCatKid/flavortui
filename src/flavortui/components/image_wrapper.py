@@ -40,7 +40,7 @@ class LazySettingsImage(Vertical):
         max-height: 10;
         content-align: center middle;
         color: $text-muted;
-        border: round $panel-lighten-1;
+        border: tall $panel-lighten-1;
     }
     """
 

@@ -50,7 +50,7 @@ class UserCard(Vertical):
     UserCard {
         width: 1fr;
         height: auto;
-        border: round $accent;
+        border: tall $accent;
         text-align: center;
         background: $boost;
         padding: 1;

@@ -23,7 +23,7 @@ class PopupModal(ScrollActionsMixin, ModalScreen):
         width: 80%;
         height: 90%;
         background: $surface;
-        border: round $accent;
+        border: tall $accent;
         padding: 1 2;
     }
 

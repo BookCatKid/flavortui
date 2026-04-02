@@ -62,7 +62,7 @@ class ProjectCard(Vertical):
     ProjectCard {
         width: 1fr;
         height: auto;
-        border: round $accent;
+        border: tall $accent;
         text-align: center;
         background: $boost;
         padding: 1;
@@ -121,7 +121,7 @@ class DevlogRow(Vertical):
     DevlogRow {
         width: 100%;
         height: auto;
-        border: round $accent;
+        border: tall $accent;
         background: $boost;
         padding: 0 1 1 1;
         margin: 1 0;
@@ -151,7 +151,7 @@ class DevlogComment(Vertical):
     DevlogComment {
         width: 100%;
         height: auto;
-        border: round $secondary;
+        border: tall $secondary;
     }
     """
 
@@ -209,7 +209,7 @@ class ProjectItem(PopupModal):
 
     #item-long-description {
         padding: 1;
-        border: round $accent;
+        border: tall $accent;
         background: $boost;
     }
 
@@ -219,7 +219,7 @@ class ProjectItem(PopupModal):
     }
 
     .devlog-item {
-        border: round $accent;
+        border: tall $accent;
         background: $boost;
         margin: 1 0;
         padding: 1;
