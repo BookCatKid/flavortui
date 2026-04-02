@@ -102,6 +102,7 @@ class FlavortownTUI(App):
         self.query(self._VIEW_SELECTOR).remove()
         self.mount(view_cls())
         self.show_sidebar = False
+        self.update_offline_banner()
 
     def on_sidebar_navigate(self, message: Sidebar.Navigate) -> None:
         self._switch_view(message.view)

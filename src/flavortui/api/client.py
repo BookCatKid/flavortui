@@ -100,6 +100,9 @@ class ApiClient:
                 timeout=API_TIMEOUT,
             )
             self._save_to_cache(endpoint, response.json(), response.status_code)
+            self.is_offline = False
+        except requests.ConnectionError:
+            self.is_offline = True
         except Exception:
             pass
 
