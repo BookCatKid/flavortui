@@ -3,7 +3,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/flavortui.svg)](https://pypi.org/project/flavortui)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/flavortui.svg)](https://pypi.org/project/flavortui)
 
-FlavorTUI is a feature-rich terminal user interface (TUI) for Flavortown. With FlavorTUI, you can browse and create devlogs, manage your projects, explore the shop, and access other Flavortown features, all from an interactive terminal interface.
+FlavorTUI is a terminal user interface (TUI) for Flavortown. With FlavorTUI, you can view your stats, browse your projects and devlogs, explore the shop, and discover other users' projects, all from an interactive terminal interface.
 
 It is built using the `textual` library, which provides (imo) a great terminal UI experience. The TUI is of course written in Python 🥰. This is my first time creating a TUI so I hope its good :) Depending on your terminal, the ui might look different. It all depends on how well your terminal supports different things.
 
