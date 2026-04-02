@@ -200,10 +200,10 @@ class UserItem(PopupModal):
         try:
             api_key = get_api_key()
             user = get_user(api_key, self._user["id"])[1]
-            projects = get_projects_for_user(api_key, self._user["id"])
+            projects = get_projects_for_user(api_key, self._user["id"])[1]
 
             cards_data = []
-            for _, project in projects:
+            for project in projects["projects"]:
                 banner_url = project.get("banner_url")
                 if banner_url:
                     if banner_url.startswith("/"):

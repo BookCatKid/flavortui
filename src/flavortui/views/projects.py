@@ -384,10 +384,10 @@ class Projects(ScrollActionsMixin, Vertical):
     def _load_projects(self):
         try:
             api_key = get_api_key()
-            projects = get_projects_for_user(api_key)
+            projects = get_projects_for_user(api_key)[1]
 
             cards_data = []
-            for _, project in projects:
+            for project in projects["projects"]:
                 banner_url = project.get("banner_url")
                 if banner_url:
                     if banner_url.startswith("/"):
