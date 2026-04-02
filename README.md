@@ -3,6 +3,11 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/flavortui.svg)](https://pypi.org/project/flavortui)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/flavortui.svg)](https://pypi.org/project/flavortui)
 
+## Demo
+
+If you want a demo video dispalying *almost* all of the features, you can watch this:
+
+
 FlavorTUI is a terminal user interface (TUI) for Flavortown. With FlavorTUI, you can view your stats, browse your projects and devlogs, explore the shop, and discover other users' projects, all from an interactive terminal interface.
 
 It is built using the `textual` library, which provides (imo) a great terminal UI experience. The TUI is of course written in Python 🥰. This is my first time creating a TUI so I hope its good :) Depending on your terminal, the ui might look different. It all depends on how well your terminal supports different things.
@@ -31,10 +36,9 @@ To easily find where your data is stored, you can simply go to the bottom of the
   - Settings: `~/.config/flavortui/settings.json` (or `$XDG_CONFIG_HOME/flavortui/settings.json`)
   - Cache: `~/.cache/flavortui/` (or `$XDG_CACHE_HOME/flavortui/`)
 
-<div>
-  <img src="screenshots/kitchen.png" alt="Kitchen Screenshot" style="width:49%;">
-  <img src="screenshots/with_sidebar.png" alt="Shop Screenshot" style="width:49%;">
-</div>
+![Kitchen Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/kitchen.png)
+![Sidebar Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/with_sidebar.png)
+![Shop Screenshot](https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/shop.png)
 
 ## Installation
 
