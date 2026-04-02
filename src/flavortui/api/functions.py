@@ -11,4 +11,4 @@ def format_seconds(seconds):
 
 
 def get_days_ago(utc_time_string):
-    return (datetime.now(timezone.utc) - datetime.fromisoformat(utc_time_string)).days
+    return (datetime.now(timezone.utc) - datetime.fromisoformat(utc_time_string.replace("Z", "+00:00"))).days
