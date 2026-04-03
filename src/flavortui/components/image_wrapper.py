@@ -2,6 +2,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlparse
 
+from PIL import Image as PILImage
 from textual.containers import Vertical
 from textual.widgets import Static
 from textual_image.widget import (
@@ -16,6 +17,7 @@ from flavortui.api.api_key import get_api_key
 from flavortui.api.client import get_client
 
 _IMAGE_POOL = ThreadPoolExecutor(max_workers=4)
+THUMBNAIL_SIZE_PX = (256, 256)
 
 IMAGE_WIDGETS = {
     "auto": Image,
@@ -58,28 +60,39 @@ class LazySettingsImage(Vertical):
         self.run_worker(self._load_image_pooled, thread=True, exit_on_error=False)
 
     def _load_image_pooled(self):
-        future = _IMAGE_POOL.submit(self._resolve_path, self._image_path)
-        resolved_path = future.result()
-        if resolved_path:
-            self.app.call_from_thread(self._show_image, resolved_path)
-        else:
+        future = _IMAGE_POOL.submit(self._resolve_and_preload, self._image_path)
+        try:
+            result = future.result()
+            if result:
+                self.app.call_from_thread(self._show_image, result)
+            else:
+                self.app.call_from_thread(self._show_unavailable)
+        except Exception:
             self.app.call_from_thread(self._show_unavailable)
 
-    def _resolve_path(self, path):
+    def _resolve_and_preload(self, path):
         if not path:
             return None
 
         scheme = urlparse(path).scheme
         if scheme in {"http", "https"}:
             client = get_client(get_api_key(), self._app.settings)
-            return client.fetch_image(path)
+            resolved = client.fetch_image(path)
+        elif os.path.exists(path):
+            resolved = path
+        else:
+            return None
 
-        return path if os.path.exists(path) else None
+        with PILImage.open(resolved) as pil_img:
+            pil_img.load()
+            converted_img = pil_img.convert("RGB")
+        converted_img.thumbnail(THUMBNAIL_SIZE_PX)
+        return converted_img
 
-    def _show_image(self, image_path):
+    def _show_image(self, pil_img):
         for child in list(self.children):
             child.remove()
-        self.mount(self._image_class(image_path, **self._image_kwargs))
+        self.mount(self._image_class(pil_img, **self._image_kwargs))
 
     def _show_unavailable(self):
         placeholder = self.query_one(".image-placeholder", Static)
