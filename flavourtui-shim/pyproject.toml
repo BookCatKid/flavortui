@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "flavourtui"
+dynamic = ["version"]
+description = "Shim package for flavortui, install flavortui instead."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = [
+    "flavortui",
+]
+
+[project.scripts]
+flavourtui = "flavortui.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/flavourtui_shim"]
+
+[tool.hatch.version]
+path = "src/flavourtui_shim/__about__.py"
