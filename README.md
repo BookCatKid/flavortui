@@ -78,8 +78,16 @@ To easily find where your data is stored, you can simply go to the bottom of the
       <td><img src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/projects.png" width="100%"></td>
     </tr>
     <tr>
+      <td><img src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/shop.png" width="100%"></td>
+      <td><img src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/shop-item.png" width="100%"></td>
+    </tr>
+    <tr>
       <td><img src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/kitchen.png" width="100%"></td>
       <td><img src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/explore.png" width="100%"></td>
+    </tr>
+    <tr>
+      <td><img src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/explore-devlogs.png" width="100%"></td>
+      <td><img src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/explore-users.png" width="100%"></td>
     </tr>
     <tr>
       <td><img src="https://raw.githubusercontent.com/BookCatKid/flavortui/main/screenshots/settings.png" width="100%"></td>
