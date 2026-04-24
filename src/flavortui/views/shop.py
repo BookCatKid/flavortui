@@ -115,6 +115,10 @@ class ShopCard(Vertical):
     def is_enabled_in_region(self, region: str) -> bool:
         return self._regions.get(f"enabled_{region}", False)
 
+    def requires_achievement(self, achievement: str) -> bool:
+        requirements = self._shop_item.get("requires_achievement") or []
+        return achievement in requirements
+
     def action_open_detail(self):
         self.app.push_screen(
             ShopItem(self._image_path, self._shop_item, self._shop_data)
@@ -444,6 +448,26 @@ class Shop(ScrollActionsMixin, Vertical):
             ),
             before=footer,
         )
+        self.mount(
+            Select(
+                options=[("All Achievements", "all")]
+                + [
+                    (achievement.replace("_", " ").title(), achievement)
+                    for achievement in sorted(
+                        {
+                            achievement
+                            for item in shop_data
+                            for achievement in (item.get("requires_achievement") or [])
+                            if achievement
+                        }
+                    )
+                ],
+                prompt="Required Achievement",
+                id="achievement-select",
+                value="all",
+            ),
+            before=footer,
+        )
         grid = Grid(id="shop-grid")
         self.mount(grid, before=footer)
 
@@ -486,7 +510,7 @@ class Shop(ScrollActionsMixin, Vertical):
     def on_select_changed(self, event: Select.Changed) -> None:
         if not self._cards:
             return
-        if event.select.id in ("sort-select", "region-select"):
+        if event.select.id in ("sort-select", "region-select", "achievement-select"):
             self._refilter()
 
     def on_input_changed(self, event: Input.Changed):
@@ -498,11 +522,16 @@ class Shop(ScrollActionsMixin, Vertical):
     def _refilter(self) -> None:
         sort_value = self.query_one("#sort-select", Select).value
         region_value = self.query_one("#region-select", Select).value
+        achievement_value = self.query_one("#achievement-select", Select).value
         search_query = self.query_one("#search-input", Input).value.strip().lower()
 
         for card in self._cards:
             show = True
             if region_value != "all" and not card.is_enabled_in_region(region_value):
+                show = False
+            if achievement_value != "all" and not card.requires_achievement(
+                achievement_value
+            ):
                 show = False
             if search_query and search_query not in card.get_sort_name():
                 show = False
